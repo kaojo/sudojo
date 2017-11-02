@@ -1,0 +1,6 @@
+[package]
+name = "sudojo"
+version = "0.1.0"
+authors = ["julian.winter <julian.wnter@k-tc.de>"]
+
+[dependencies]
