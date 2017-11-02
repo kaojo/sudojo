@@ -1,14 +1,15 @@
 use std::io;
 use std::process;
 use sudojo_core::app::{EStartChoice, App};
+use sudoku;
 
 pub struct AppStarter<T: App> {
     app: T,
 }
 
 impl<T: App> AppStarter<T> {
-    pub fn new(app: T) -> AppStarter<T> {
-        AppStarter { app: app }
+    pub fn new() -> AppStarter<sudoku::Sudoku> {
+        AppStarter { app: sudoku::Sudoku::new()}
     }
 }
 
