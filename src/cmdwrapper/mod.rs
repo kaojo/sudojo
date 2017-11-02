@@ -1,17 +1,6 @@
 use std::io;
 use std::process;
-
-#[derive(Debug)]
-pub enum EStartChoice {
-    NewGame,
-    LoadGame,
-    Quit,
-    Invalid,
-}
-
-pub trait App {
-    fn start(&mut self, &Option<EStartChoice>);
-}
+use sudojo_core::app::{EStartChoice, App};
 
 pub struct AppStarter<T: App> {
     app: T,

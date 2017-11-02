@@ -1,7 +1,4 @@
-pub mod cmdwrapper;
-pub mod sudoku;
-extern crate ansi_term;
-extern crate sudojo_core;
+pub mod app;
 
 #[cfg(test)]
 mod tests {

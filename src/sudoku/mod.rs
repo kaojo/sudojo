@@ -1,7 +1,7 @@
-use cmdwrapper::{App, EStartChoice};
 use sudoku::game::{Board, Coordinate, Square};
+use sudojo_core::app::{EStartChoice, App};
 
-pub mod game;
+mod game;
 
 pub struct Sudoku {
     board: Board,

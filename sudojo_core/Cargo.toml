@@ -1,0 +1,6 @@
+[package]
+name = "sudojo_core"
+version = "0.1.0"
+authors = ["kaojo <mail@kaojo.de>"]
+
+[dependencies]

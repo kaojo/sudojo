@@ -4,4 +4,5 @@ version = "0.1.0"
 authors = ["julian.winter <julian.wnter@k-tc.de>"]
 
 [dependencies]
+sudojo_core = {path = "sudojo_core", version = "0.1.0"}
 ansi_term = "0.10.2"

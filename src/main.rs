@@ -1,7 +1,9 @@
 extern crate sudojo;
+extern crate sudojo_core;
 
-use sudojo::cmdwrapper::{self, App};
+use sudojo::cmdwrapper;
 use sudojo::sudoku::Sudoku;
+use sudojo_core::app::{App};
 
 fn main() {
     println!("Starting sudojo!");
