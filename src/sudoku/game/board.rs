@@ -1,8 +1,9 @@
 use std::collections::HashMap;
 use super::{Coordinate, Square};
 use std::fmt;
+use ansi_term::Colour::Red;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Board {
     data: HashMap<Coordinate, Square>,
     initialized: bool,
@@ -48,29 +49,36 @@ impl Board {
 
 impl fmt::Display for Board {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        writeln!(f, "Board");
+        let _ = writeln!(f, "Board");
         let boarders = [1, 4, 7];
         for y in 1..10 {
             if boarders.contains(&y) {
-                writeln!(f, "-------------------------");
+                let _ = writeln!(f, "-------------------------");
             }
             for x in 1..10 {
                 if boarders.contains(&x) {
-                    write!(f, "| ");
+                    let _ = write!(f, "| ");
                 }
-                write!(
+                let default_square = Square::new(None, true);
+                let square = self.get_square(&Coordinate::new(x, y))
+                        .unwrap_or(&default_square);
+                let _ = write!(
                     f,
                     "{} ",
-                    match self.get_square(&Coordinate::new(x, y))
-                        .unwrap_or(&Square::new(None, true))
-                        .value
+                    match square.value
                     {
                         None => String::from(" "),
-                        Some(ref p) => String::from(p.to_string()),
+                        Some(ref p) => {
+                            let mut digit = p.to_string();
+                            if square.conflict {
+                                digit = Red.paint(digit).to_string();
+                            }
+                            String::from(digit)
+                            },
                     }
                 );
             }
-            writeln!(f, "|");
+            let _ = writeln!(f, "|");
         }
         writeln!(f, "-------------------------")
     }

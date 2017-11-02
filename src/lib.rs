@@ -1,5 +1,6 @@
 pub mod cmdwrapper;
 pub mod sudoku;
+extern crate ansi_term;
 
 #[cfg(test)]
 mod tests {

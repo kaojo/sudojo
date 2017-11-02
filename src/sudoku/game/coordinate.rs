@@ -1,4 +1,4 @@
-#[derive(Debug, Eq, Hash)]
+#[derive(Clone, Debug, Eq, Hash)]
 pub struct Coordinate {
     pub x: u8,
     pub y: u8,
