@@ -1,7 +1,7 @@
 use sudoku::game::{Board, Coordinate, Square};
 use sudojo_core::app::{Action, App, AppState, EAction, EAppState, EStartChoice, Start, Tick, Turn};
 use std::io;
-use regex::{Regex};
+use regex::Regex;
 
 mod game;
 
@@ -47,7 +47,7 @@ impl Turn for Sudoku {
         while let None = choice {
             choice = get_turn();
         }
-   }
+    }
 }
 
 impl Tick for Sudoku {
@@ -67,9 +67,9 @@ fn get_turn() -> Option<(Coordinate, Square)> {
     println!("x,y,z");
     println!("h - help");
     let mut choice = String::new();
-    io::stdin()
-        .read_line(&mut choice)
-        .expect("Could not read line.");
+    io::stdin().read_line(&mut choice).expect(
+        "Could not read line.",
+    );
     parse_turn(&choice)
 }
 
