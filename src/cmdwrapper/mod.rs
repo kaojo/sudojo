@@ -61,9 +61,9 @@ fn get_start_choice() -> EStartChoice {
 
     let mut choice = String::new();
 
-    io::stdin()
-        .read_line(&mut choice)
-        .expect("Could not read line.");
+    io::stdin().read_line(&mut choice).expect(
+        "Could not read line.",
+    );
 
     let result: EStartChoice;
     match choice.trim() {

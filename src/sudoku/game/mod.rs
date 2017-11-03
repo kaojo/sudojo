@@ -4,4 +4,3 @@ pub use self::square::Square;
 mod board;
 mod coordinate;
 mod square;
-

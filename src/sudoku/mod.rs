@@ -1,7 +1,7 @@
 use sudoku::game::{Board, Coordinate, Square};
-use sudojo_core::app::{EStartChoice, EAppState, EAction, App, Turn, Tick, Start, AppState, Action};
+use sudojo_core::app::{Action, App, AppState, EAction, EAppState, EStartChoice, Start, Tick, Turn};
 use std::io;
-use regex::Regex;
+use regex::{Regex};
 
 mod game;
 
@@ -17,11 +17,9 @@ impl Sudoku {
             app_state: EAppState::Running,
         }
     }
-
 }
 
-impl App for Sudoku {
-}
+impl App for Sudoku {}
 
 impl Start for Sudoku {
     fn start(&mut self, start_choice: &Option<EStartChoice>) {
@@ -29,7 +27,7 @@ impl Start for Sudoku {
         match *start_choice {
             Some(EStartChoice::NewGame) => {
                 println!("Starting new game!");
-               init(&mut self.board);
+                init(&mut self.board);
             }
             _ => println!("Choice not supported yet"),
         }
@@ -38,14 +36,18 @@ impl Start for Sudoku {
 
 impl AppState for Sudoku {
     fn get_state(&self) -> &EAppState {
-        return &self.app_state
+        return &self.app_state;
     }
 }
 
 impl Turn for Sudoku {
     fn do_turn(&self) {
+        println!("{}", &self.board);
         let mut choice = get_turn();
-    }
+        while let None = choice {
+            choice = get_turn();
+        }
+   }
 }
 
 impl Tick for Sudoku {
@@ -60,38 +62,48 @@ impl Action for Sudoku {
     }
 }
 
-fn get_turn() -> String {
+fn get_turn() -> Option<(Coordinate, Square)> {
     println!("Next turn: ");
     println!("x,y,z");
     println!("h - help");
     let mut choice = String::new();
-
     io::stdin()
         .read_line(&mut choice)
         .expect("Could not read line.");
-
-
-    choice
+    parse_turn(&choice)
 }
 
-fn is_turn(text: &str) -> Option<(Coordinate, Square)> {
+fn parse_turn(text: &str) -> Option<(Coordinate, Square)> {
     lazy_static! {
         static ref RE: Regex = Regex::new(r"^(?P<x>\d),(?P<y>\d),(?P<z>\d)$").unwrap();
     }
     match RE.captures(text.trim()) {
         Some(ref p) => {
-            p.name("x");
-            Some((Coordinate::new(1, 2), Square::new(Some(1), false)))
-        },
-        None => None
+            let x = p.name("x")
+                .expect("x should not be optional in regex expression")
+                .as_str()
+                .parse::<u8>()
+                .expect("should be an integer");
+            let y = p.name("y")
+                .expect("y should not be optional in regex expression")
+                .as_str()
+                .parse::<u8>()
+                .expect("should be an integer");
+            let z = p.name("z")
+                .expect("z should not be optional in regex expression")
+                .as_str()
+                .parse::<u8>()
+                .expect("should be an integer");
+            Some((Coordinate::new(x, y), Square::new(Some(z), false)))
+        }
+        None => None,
     }
 }
 
-fn init(board : &mut Board) {
+fn init(board: &mut Board) {
     for x in 1..10 {
         for y in 1..10 {
-            let result = board
-                .fill_square(Coordinate::new(x, y), Square::new(None, true));
+            let result = board.fill_square(Coordinate::new(x, y), Square::new(None, true));
             match result {
                 Ok(_) => (),
                 Err(ref p) => panic!("Error {} during initialization at x {}, y {}", p, x, y),
@@ -127,12 +139,12 @@ fn init(board : &mut Board) {
         (4, 9, Some(6)),
         (6, 9, Some(5)),
         (7, 9, Some(7)),
-        ];
-    for &(x,y,value) in square_map.into_iter() {
+    ];
+    for &(x, y, value) in square_map.into_iter() {
         let result = board.fill_square(Coordinate::new(x, y), Square::new(value, true));
         match result {
             Ok(_) => (),
-            Err(ref p) => panic!("Error {} during initialization", p), // at x {}, y {}", p, &coord.x, &coord.y),
+            Err(ref p) => panic!("Error {} during initialization", p),
         }
     }
 }
