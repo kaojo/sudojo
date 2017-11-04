@@ -29,16 +29,9 @@ impl Board {
         } else {
             let result: Option<Square> = self.data.insert(coord, square);
             match result {
-                Some(ref p) => {
-                    match p.value {
-                        Some(_) => {
-                            return Err(String::from(
-                                "A Field with these coordinates allready exists!",
-                            ))
-                        }
-                        None => Ok(()),
-                    }
-                }
+                Some(_) => {
+                    return Err(String::from("A Field with these coordinates allready exists!"))
+                },
                 None => return Ok(()),
             }
         }
@@ -65,18 +58,15 @@ impl fmt::Display for Board {
                 if boarders.contains(&x) {
                     let _ = write!(f, "| ");
                 }
-                let default_square = Square::new(None, true);
-                let square = self.get_square(&Coordinate::new(x, y)).unwrap_or(
-                    &default_square,
-                );
+                let square = self.get_square(&Coordinate::new(x, y));
                 let _ = write!(
                     f,
                     "{} ",
-                    match square.value {
+                    match square {
                         None => String::from(" "),
                         Some(ref p) => {
-                            let mut digit = p.to_string();
-                            if square.conflict {
+                            let mut digit = p.value.to_string();
+                            if p.conflict {
                                 digit = Red.paint(digit).to_string();
                             }
                             String::from(digit)

@@ -92,7 +92,7 @@ fn parse_turn(text: &str) -> Option<(Coordinate, Square)> {
                 .parse::<u8>()
                 .expect("should be an integer");
             println!("{},{},{}", x, y, z);
-            Some((Coordinate::new(x, y), Square::new(Some(z), false)))
+            Some((Coordinate::new(x, y), Square::new(z, false)))
         }
         None => None,
     }
