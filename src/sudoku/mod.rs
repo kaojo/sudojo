@@ -41,12 +41,14 @@ impl AppState for Sudoku {
 }
 
 impl Turn for Sudoku {
-    fn do_turn(&self) {
+    fn do_turn(&mut self) {
         println!("{}", &self.board);
         let mut choice = get_turn();
         while let None = choice {
             choice = get_turn();
         }
+        let (coord, square) = choice.unwrap();
+        self.board.fill_square(coord, square).expect("not allowed");
     }
 }
 
@@ -65,7 +67,9 @@ impl Action for Sudoku {
 fn get_turn() -> Option<(Coordinate, Square)> {
     println!("Next turn: ");
     println!("x,y,z");
-    println!("h - help");
+    println!("u - undo last turn");
+    println!("r - revert everything");
+    println!("h - do next allowed turn for me");
     let mut choice = String::new();
     io::stdin().read_line(&mut choice).expect(
         "Could not read line.",
@@ -94,6 +98,7 @@ fn parse_turn(text: &str) -> Option<(Coordinate, Square)> {
                 .as_str()
                 .parse::<u8>()
                 .expect("should be an integer");
+            println!("{},{},{}",x,y,z);
             Some((Coordinate::new(x, y), Square::new(Some(z), false)))
         }
         None => None,
@@ -147,4 +152,5 @@ fn init(board: &mut Board) {
             Err(ref p) => panic!("Error {} during initialization", p),
         }
     }
+    board.initialized(true);
 }

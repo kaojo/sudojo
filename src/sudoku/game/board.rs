@@ -47,6 +47,10 @@ impl Board {
     pub fn get_square(&self, coord: &Coordinate) -> Option<&Square> {
         self.data.get(coord)
     }
+
+    pub fn initialized(&mut self, init: bool) {
+        self.initialized = init;
+    }
 }
 
 impl fmt::Display for Board {

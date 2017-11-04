@@ -26,7 +26,7 @@ pub enum EAction {
 }
 
 pub trait Turn {
-    fn do_turn(&self);
+    fn do_turn(&mut self);
 }
 
 pub trait Tick {
