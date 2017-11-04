@@ -25,8 +25,8 @@ pub enum EAction {
     Exit(EExitAction),
 }
 
-pub trait Turn {
-    fn do_turn(&mut self);
+pub trait Turn<T> {
+    fn do_turn(&mut self, turn: T);
 }
 
 pub trait Tick {
@@ -45,5 +45,5 @@ pub trait Action {
     fn get_action(&self) -> EAction;
 }
 
-pub trait App: Turn + Tick + Start + AppState + Action {
+pub trait App<T>: Turn<T> + Tick + Start + AppState + Action {
 }

@@ -1,9 +1,7 @@
 use sudoku::game::{Board, Coordinate, Square};
 use sudojo_core::app::{Action, App, AppState, EAction, EAppState, EStartChoice, Start, Tick, Turn};
-use std::io;
-use regex::Regex;
 
-mod game;
+pub mod game;
 
 pub struct Sudoku {
     board: Board,
@@ -19,7 +17,7 @@ impl Sudoku {
     }
 }
 
-impl App for Sudoku {}
+impl App<(Coordinate, Square)> for Sudoku {}
 
 impl Start for Sudoku {
     fn start(&mut self, start_choice: &Option<EStartChoice>) {
@@ -31,6 +29,7 @@ impl Start for Sudoku {
             }
             _ => println!("Choice not supported yet"),
         }
+        println!("{}", &self.board);
     }
 }
 
@@ -40,15 +39,11 @@ impl AppState for Sudoku {
     }
 }
 
-impl Turn for Sudoku {
-    fn do_turn(&mut self) {
-        println!("{}", &self.board);
-        let mut choice = get_turn();
-        while let None = choice {
-            choice = get_turn();
-        }
-        let (coord, square) = choice.unwrap();
+impl Turn<(Coordinate, Square)> for Sudoku {
+    fn do_turn(&mut self, turn: (Coordinate, Square)) {
+        let (coord, square) = turn;
         self.board.fill_square(coord, square).expect("not allowed");
+        println!("{}", &self.board);
     }
 }
 
@@ -61,47 +56,6 @@ impl Tick for Sudoku {
 impl Action for Sudoku {
     fn get_action(&self) -> EAction {
         EAction::Turn
-    }
-}
-
-fn get_turn() -> Option<(Coordinate, Square)> {
-    println!("Next turn: ");
-    println!("x,y,z");
-    println!("u - undo last turn");
-    println!("r - revert everything");
-    println!("h - do next allowed turn for me");
-    let mut choice = String::new();
-    io::stdin().read_line(&mut choice).expect(
-        "Could not read line.",
-    );
-    parse_turn(&choice)
-}
-
-fn parse_turn(text: &str) -> Option<(Coordinate, Square)> {
-    lazy_static! {
-        static ref RE: Regex = Regex::new(r"^(?P<x>\d),(?P<y>\d),(?P<z>\d)$").unwrap();
-    }
-    match RE.captures(text.trim()) {
-        Some(ref p) => {
-            let x = p.name("x")
-                .expect("x should not be optional in regex expression")
-                .as_str()
-                .parse::<u8>()
-                .expect("should be an integer");
-            let y = p.name("y")
-                .expect("y should not be optional in regex expression")
-                .as_str()
-                .parse::<u8>()
-                .expect("should be an integer");
-            let z = p.name("z")
-                .expect("z should not be optional in regex expression")
-                .as_str()
-                .parse::<u8>()
-                .expect("should be an integer");
-            println!("{},{},{}",x,y,z);
-            Some((Coordinate::new(x, y), Square::new(Some(z), false)))
-        }
-        None => None,
     }
 }
 
