@@ -17,7 +17,7 @@ impl Sudoku {
     }
 }
 
-impl App<(Coordinate, Square)> for Sudoku {}
+impl App<(Coordinate, Square), Board> for Sudoku {}
 
 impl Start for Sudoku {
     fn start(&mut self, start_choice: &Option<EStartChoice>) {
@@ -39,11 +39,11 @@ impl AppState for Sudoku {
     }
 }
 
-impl Turn<(Coordinate, Square)> for Sudoku {
-    fn do_turn(&mut self, turn: (Coordinate, Square)) {
+impl Turn<(Coordinate, Square), Board> for Sudoku {
+    fn do_turn(&mut self, turn: (Coordinate, Square)) -> Result<&Board, String>{
         let (coord, square) = turn;
-        self.board.fill_square(coord, square).expect("not allowed");
-        println!("{}", &self.board);
+        self.board.fill_square(coord, square)?;
+        Ok(&self.board)
     }
 }
 

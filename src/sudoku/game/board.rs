@@ -27,14 +27,15 @@ impl Board {
                 "Can't put non initial values in the board during init phase.",
             ));
         } else {
-            let result: Option<Square> = self.data.insert(coord, square);
-            match result {
-                Some(_) => {
-                    return Err(String::from("A Field with these coordinates allready exists!"))
-                },
-                None => return Ok(()),
+            if self.data.contains_key(&coord) {
+                return Err(String::from(
+                    "A Field with these coordinates allready exists!",
+                ));
+            } else {
+                self.data.insert(coord, square);
             }
         }
+        Ok(())
     }
 
     pub fn get_square(&self, coord: &Coordinate) -> Option<&Square> {

@@ -2,11 +2,11 @@ use std::io;
 use std::process;
 use sudojo_core::app::{App, AppState, EAction, EAppState, EStartChoice, Start};
 use sudoku::Sudoku;
-use sudoku::game::{Coordinate, Square};
+use sudoku::game::{Coordinate, Square, Board};
 use regex::Regex;
 
 pub struct AppStarter {
-    app: Box<App<(Coordinate, Square)>>,
+    app: Box<App<(Coordinate, Square), Board>>,
     app_state: EAppState,
 }
 
@@ -43,7 +43,11 @@ impl Start for AppStarter {
                     while let None = choice {
                         choice = get_turn();
                     }
-                    self.app.do_turn(choice.unwrap());
+                    let result = self.app.do_turn(choice.unwrap());
+                    match result {
+                        Err(ref p) => println!("Could not execute turn: {}", p),
+                        Ok(ref p) => println!("{}", p),
+                    }
                 }
                 _ => (),
             }
@@ -59,7 +63,7 @@ impl AppState for AppStarter {
 
 fn get_turn() -> Option<(Coordinate, Square)> {
     println!("Next turn: ");
-    println!("x,y,z");
+    println!("x,y,z - (x,y) are coordinates, z is the value for the square");
     println!("u - undo last turn");
     println!("r - revert everything");
     println!("h - do next allowed turn for me");
