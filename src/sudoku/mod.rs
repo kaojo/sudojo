@@ -1,5 +1,5 @@
 use sudoku::game::{Board, Coordinate, Square};
-use sudojo_core::app::{Action, App, AppState, EAction, EAppState, EStartChoice, Start, Tick, Turn};
+use sudojo_core::app::{App, AppState, EAppState, EStartChoice, Start, Tick, Turn};
 
 pub mod game;
 
@@ -50,12 +50,6 @@ impl Turn<(Coordinate, Square), Board> for Sudoku {
 impl Tick for Sudoku {
     fn do_tick(&self) {
         panic!("Not implemented!")
-    }
-}
-
-impl Action for Sudoku {
-    fn get_action(&self) -> EAction {
-        EAction::Turn
     }
 }
 

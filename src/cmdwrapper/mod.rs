@@ -1,19 +1,20 @@
 use std::io;
 use std::process;
-use sudojo_core::app::{App, AppState, EAction, EAppState, EStartChoice, Start};
+use sudojo_core::app::{AppState, EAppState, EStartChoice, Start};
 use sudoku::Sudoku;
-use sudoku::game::{Coordinate, Square, Board};
-use regex::Regex;
+use self::game_loop::GameLoop;
+
+mod game_loop;
 
 pub struct AppStarter {
-    app: Box<App<(Coordinate, Square), Board>>,
+    app: Sudoku,
     app_state: EAppState,
 }
 
 impl AppStarter {
     pub fn new() -> AppStarter {
         AppStarter {
-            app: Box::from(Sudoku::new()),
+            app: Sudoku::new(),
             app_state: EAppState::Running,
         }
     }
@@ -35,23 +36,7 @@ impl Start for AppStarter {
                 self.app.start(&Some(choice));
             }
         }
-        while self.app.as_ref().get_state() == &EAppState::Running {
-            let action = self.app.get_action();
-            match action {
-                EAction::Turn => {
-                    let mut choice = get_turn();
-                    while let None = choice {
-                        choice = get_turn();
-                    }
-                    let result = self.app.do_turn(choice.unwrap());
-                    match result {
-                        Err(ref p) => println!("Could not execute turn: {}", p),
-                        Ok(ref p) => println!("{}", p),
-                    }
-                }
-                _ => (),
-            }
-        }
+        self.app.do_loop();
     }
 }
 
@@ -60,48 +45,6 @@ impl AppState for AppStarter {
         return &self.app_state;
     }
 }
-
-fn get_turn() -> Option<(Coordinate, Square)> {
-    println!("Next turn: ");
-    println!("x,y,z - (x,y) are coordinates, z is the value for the square");
-    println!("u - undo last turn");
-    println!("r - revert everything");
-    println!("h - do next allowed turn for me");
-    let mut choice = String::new();
-    io::stdin()
-        .read_line(&mut choice)
-        .expect("Could not read line.");
-    parse_turn(&choice)
-}
-
-fn parse_turn(text: &str) -> Option<(Coordinate, Square)> {
-    lazy_static! {
-        static ref RE: Regex = Regex::new(r"^(?P<x>\d),(?P<y>\d),(?P<z>\d)$").unwrap();
-    }
-    match RE.captures(text.trim()) {
-        Some(ref p) => {
-            let x = p.name("x")
-                .expect("x should not be optional in regex expression")
-                .as_str()
-                .parse::<u8>()
-                .expect("should be an integer");
-            let y = p.name("y")
-                .expect("y should not be optional in regex expression")
-                .as_str()
-                .parse::<u8>()
-                .expect("should be an integer");
-            let z = p.name("z")
-                .expect("z should not be optional in regex expression")
-                .as_str()
-                .parse::<u8>()
-                .expect("should be an integer");
-            println!("{},{},{}", x, y, z);
-            Some((Coordinate::new(x, y), Square::new(z, false)))
-        }
-        None => None,
-    }
-}
-
 
 fn get_start_choice() -> EStartChoice {
     println!("What do you want to do ?");

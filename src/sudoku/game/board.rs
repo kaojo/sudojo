@@ -60,9 +60,6 @@ impl Board {
         let cloned_data = self.data.clone();
         let mut conflicts: HashSet<&Coordinate> = HashSet::new();
         for (coord, square) in cloned_data.iter() {
-            let x = coord.x;
-            let y = coord.y;
-            println!("{},{},{}", x, y, square.value);
             match HorizontalUniqueRule::apply(&coord, &square, &self) {
                 EGameState::Conflict => {
                     conflicts.insert(coord);
@@ -102,7 +99,7 @@ impl fmt::Display for Board {
         let boarders = [1, 4, 7];
         for y in 1..10 {
             if boarders.contains(&y) {
-                let _ = writeln!(f, "-------------------------");
+                let _ = writeln!(f, "+-------+-------+-------+");
             }
             for x in 1..10 {
                 if boarders.contains(&x) {
@@ -128,6 +125,6 @@ impl fmt::Display for Board {
             }
             let _ = writeln!(f, "|");
         }
-        writeln!(f, "-------------------------")
+        writeln!(f, "+-------+-------+-------+")
     }
 }

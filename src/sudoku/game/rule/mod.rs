@@ -47,7 +47,6 @@ impl QuadrantUniqueRule {
         let y_quadrant = (coord.y as f32 / 3 as f32).ceil() as u8;
         for y in (y_quadrant * 3 - 2)..(y_quadrant * 3 + 1) {
             for x in (x_quadrant * 3 - 2)..(x_quadrant * 3 + 1) {
-                println!("Q-Rule {},{}", x, y);
                 if y != coord.y && x != coord.x {
                     let compare_square = board.get_square(&Coordinate::new(x, y));
                     if compare_square.is_some() {
