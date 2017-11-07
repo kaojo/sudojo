@@ -1,9 +1,8 @@
-use sudojo_core::app::{EAppState, Turn, AppState};
+use sudojo_core::app::{AppState, EAppState, Turn};
 use sudoku::Sudoku;
-use sudoku::game::Coordinate;
-use sudoku::game::Square;
-use regex::Regex;
 use std::io;
+use super::command_parsing::CommandActionTypeParser;
+use super::command_parsing::EActionType;
 
 pub trait GameLoop {
     fn do_loop(&mut self);
@@ -11,53 +10,37 @@ pub trait GameLoop {
 
 impl GameLoop for Sudoku {
     fn do_loop(&mut self) {
+        let parser = CommandActionTypeParser {};
+        parser.print_help();
         while self.get_state() == &EAppState::Running {
-            let mut choice = get_turn();
-            while let None = choice {
-                choice = get_turn();
-            }
-            let result = self.do_turn(choice.unwrap());
-            match result {
-                Err(ref p) => println!("Could not execute turn: {}", p),
-                Ok(ref p) => println!("{}", p),
+            let raw_choice = get_raw_cmd();
+            let cmd_type = parser.get_action_type(&raw_choice);
+            match cmd_type {
+                EActionType::Turn(ref p) => {
+                    let result = self.do_turn(p.clone());
+                    match result {
+                        Err(ref p) => println!("Could not execute turn: {}", p),
+                        Ok(ref p) => println!("{}", p),
+                    }
+                }
+                EActionType::Delete(ref p) => {}
+                EActionType::Help => {}
+                EActionType::Revert => {}
+                EActionType::Solve => {}
+                EActionType::Suggest => {}
+                EActionType::Undo => {}
+                EActionType::Quit => {}
+                _ => {}
             }
         }
     }
 }
 
 
-fn get_turn() -> Option<(Coordinate, Square)> {
+fn get_raw_cmd() -> String {
     let mut choice = String::new();
     io::stdin()
         .read_line(&mut choice)
         .expect("Could not read line.");
-    parse_turn(&choice)
-}
-
-fn parse_turn(text: &str) -> Option<(Coordinate, Square)> {
-    lazy_static! {
-        static ref RE: Regex = Regex::new(r"^(?P<x>\d),(?P<y>\d),(?P<z>\d)$").unwrap();
-    }
-    match RE.captures(text.trim()) {
-        Some(ref p) => {
-            let x = p.name("x")
-                .expect("x should not be optional in regex expression")
-                .as_str()
-                .parse::<u8>()
-                .expect("should be an integer");
-            let y = p.name("y")
-                .expect("y should not be optional in regex expression")
-                .as_str()
-                .parse::<u8>()
-                .expect("should be an integer");
-            let z = p.name("z")
-                .expect("z should not be optional in regex expression")
-                .as_str()
-                .parse::<u8>()
-                .expect("should be an integer");
-            println!("{},{},{}", x, y, z);
-            Some((Coordinate::new(x, y), Square::new(z, false)))
-        }
-        None => None,
-    }
+    choice
 }

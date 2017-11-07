@@ -5,6 +5,7 @@ use sudoku::Sudoku;
 use self::game_loop::GameLoop;
 
 mod game_loop;
+mod command_parsing;
 
 pub struct AppStarter {
     app: Sudoku,
