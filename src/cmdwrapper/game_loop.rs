@@ -13,6 +13,7 @@ impl GameLoop for Sudoku {
         let parser = CommandActionTypeParser {};
         parser.print_help();
         while self.get_state() == &EAppState::Running {
+            println!("{}", self.board);
             let raw_choice = get_raw_cmd();
             let cmd_type = parser.get_action_type(&raw_choice);
             match cmd_type {
@@ -20,14 +21,14 @@ impl GameLoop for Sudoku {
                     let result = self.do_turn(p.clone());
                     match result {
                         Err(ref p) => println!("Could not execute turn: {}", p),
-                        Ok(ref p) => println!("{}", p),
+                        Ok(_) => (),
                     }
                 }
                 EActionType::Delete(ref p) => {
                     let result = self.do_turn((p.clone(), None));
                     match result {
                         Err(ref p) => println!("Could not execute turn: {}", p),
-                        Ok(ref p) => println!("{}", p),
+                        Ok(_) => (),
                     }
                 }
                 EActionType::Help => {parser.print_help()}

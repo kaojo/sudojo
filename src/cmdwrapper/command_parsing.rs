@@ -18,7 +18,7 @@ pub struct CommandActionTypeParser {}
 impl CommandActionTypeParser {
     pub fn print_help(&self) {
         println!("To perform an action first enter the type of action you want to perform");
-        println!("t x,y,z - (x,y) are coordinates, z is the value for the square.");
+        println!("x,y,z - (x,y) are coordinates, z is the value for the square.");
         println!("u - undo last turn");
         println!("d [x,y] - delete a square");
         println!("r - revert everything");
@@ -31,36 +31,42 @@ impl CommandActionTypeParser {
 
     pub fn get_action_type(&self, raw_command: &String) -> EActionType {
         if raw_command.starts_with("t") {
-            let command: String = raw_command.chars().skip(1).take(raw_command.len()).collect();
+            let command: String = raw_command
+                .chars()
+                .skip(1)
+                .take(raw_command.len())
+                .collect();
             match parse_turn(command) {
                 Some(ref p) => EActionType::Turn(p.clone()),
                 None => EActionType::Invalid,
             }
-        } 
-        else if raw_command.starts_with("u") {
+        } else if raw_command.starts_with("u") {
             EActionType::Undo
-        }
-        else if raw_command.starts_with("d") {
-            let command: String = raw_command.chars().skip(1).take(raw_command.len()).collect();
+        } else if raw_command.starts_with("d") {
+            let command: String = raw_command
+                .chars()
+                .skip(1)
+                .take(raw_command.len())
+                .collect();
             match parse_delete(command) {
                 Some(ref p) => EActionType::Delete(p.clone()),
                 None => EActionType::Invalid,
             }
-        }
-        else if raw_command.starts_with("r") {
+        } else if raw_command.starts_with("r") {
             EActionType::Revert
-        }
-        else if raw_command.starts_with("c") {
+        } else if raw_command.starts_with("c") {
             EActionType::Suggest
-        }
-        else if raw_command.starts_with("s") {
+        } else if raw_command.starts_with("s") {
             EActionType::Solve
-        }
-        else if raw_command.starts_with("q") {
+        } else if raw_command.starts_with("q") {
             EActionType::Quit
-        }
-        else if raw_command.starts_with("h") {
+        } else if raw_command.starts_with("h") {
             EActionType::Help
+        } else if parse_turn(raw_command.clone()).is_some() {
+            match parse_turn(raw_command.clone()) {
+                Some(ref p) => EActionType::Turn(p.clone()),
+                None => EActionType::Invalid,
+            }
         } else {
             EActionType::Invalid
         }

@@ -21,7 +21,6 @@ impl App<(Coordinate, Option<Square>), Board> for Sudoku {}
 
 impl Start for Sudoku {
     fn start(&mut self, start_choice: &Option<EStartChoice>) {
-        println!("Sudoku: {:?}", start_choice);
         match *start_choice {
             Some(EStartChoice::NewGame) => {
                 println!("Starting new game!");
