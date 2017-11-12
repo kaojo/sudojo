@@ -18,7 +18,7 @@ pub struct CommandActionTypeParser {}
 impl CommandActionTypeParser {
     pub fn print_help(&self) {
         println!("To perform an action first enter the type of action you want to perform");
-        println!("x,y,z - (x,y) are coordinates, z is the value for the square.");
+        println!("t x,y,z - (x,y) are coordinates, z is the value for the square. 't' can be omitted since it is the default command.");
         println!("u - undo last turn");
         println!("d [x,y] - delete a square");
         println!("r - revert everything");
