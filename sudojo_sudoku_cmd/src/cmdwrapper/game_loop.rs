@@ -1,6 +1,9 @@
 use sudojo_core::app::{AppState, EAppState, Turn};
-use sudoku::Sudoku;
+use sudojo_sudoku_core::sudoku::ai::SuggestionController;
+use sudojo_sudoku_core::sudoku::Sudoku;
+use sudojo_sudoku_core::sudoku::game::{Coordinate, Square};
 use std::io;
+use std::collections::HashSet;
 use super::command_parsing::CommandActionTypeParser;
 use super::command_parsing::EActionType;
 
@@ -34,7 +37,10 @@ impl GameLoop for Sudoku {
                 EActionType::Help => {parser.print_help()}
                 EActionType::Revert => {self.board.revert()}
                 EActionType::Solve => {}
-                EActionType::Suggest => {}
+                EActionType::Suggest => {
+                    let suggestion_controller : SuggestionController = SuggestionController::new(&self.board);
+                    let possible_turns: HashSet<(Coordinate, Square)> = suggestion_controller.get_suggestions();
+                }
                 EActionType::Undo => {self.board.undo_last()}
                 EActionType::Quit => {self.app_state = EAppState::Exit}
                 _ => {

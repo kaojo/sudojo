@@ -1,7 +1,7 @@
-extern crate sudojo;
 extern crate sudojo_core;
+extern crate sudojo_sudoku_cmd;
 
-use sudojo::cmdwrapper;
+use sudojo_sudoku_cmd::cmdwrapper;
 use sudojo_core::app::Start;
 
 fn main() {

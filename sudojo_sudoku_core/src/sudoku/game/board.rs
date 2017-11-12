@@ -90,6 +90,10 @@ impl Board {
         self.initialized = init;
     }
 
+    pub fn get_data(&self) -> &HashMap<Coordinate, Square> {
+        &self.data
+    }
+
     fn mark_conflicts(&mut self) -> bool {
         let cloned_data = self.data.clone();
         let mut conflicts: HashSet<&Coordinate> = HashSet::new();

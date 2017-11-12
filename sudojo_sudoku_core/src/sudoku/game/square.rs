@@ -1,6 +1,5 @@
 
-
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Square {
     pub value: u8,
     pub initial: bool,

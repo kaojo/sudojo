@@ -50,15 +50,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 name = "sudojo"
 version = "0.1.0"
 dependencies = [
- "ansi_term 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "lazy_static 0.2.9 (registry+https://github.com/rust-lang/crates.io-index)",
- "regex 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "sudojo_core 0.1.0",
+ "sudojo_sudoku_cmd 0.1.0",
 ]
 
 [[package]]
 name = "sudojo_core"
 version = "0.1.0"
+
+[[package]]
+name = "sudojo_sudoku_cmd"
+version = "0.1.0"
+dependencies = [
+ "lazy_static 0.2.9 (registry+https://github.com/rust-lang/crates.io-index)",
+ "regex 0.2.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sudojo_core 0.1.0",
+ "sudojo_sudoku_core 0.1.0",
+]
+
+[[package]]
+name = "sudojo_sudoku_core"
+version = "0.1.0"
+dependencies = [
+ "ansi_term 0.10.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sudojo_core 0.1.0",
+]
 
 [[package]]
 name = "thread_local"

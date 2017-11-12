@@ -2,6 +2,7 @@ use sudoku::game::{Board, Coordinate, Square};
 use sudojo_core::app::{App, AppState, EAppState, EStartChoice, Start, Tick, Turn};
 
 pub mod game;
+pub mod ai;
 
 pub struct Sudoku {
     pub board: Board,

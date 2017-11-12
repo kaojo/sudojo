@@ -1,4 +1,4 @@
-use sudoku::game::{Coordinate, Square};
+use sudojo_sudoku_core::sudoku::game::{Coordinate, Square};
 use regex::Regex;
 
 pub enum EActionType {

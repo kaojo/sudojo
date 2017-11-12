@@ -1,7 +1,7 @@
 use std::io;
 use std::process;
 use sudojo_core::app::{AppState, EAppState, EStartChoice, Start};
-use sudoku::Sudoku;
+use sudojo_sudoku_core::sudoku::Sudoku;
 use self::game_loop::GameLoop;
 
 mod game_loop;
