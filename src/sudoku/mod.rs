@@ -46,7 +46,7 @@ impl Turn<(Coordinate, Option<Square>), Board> for Sudoku {
                 return Ok(&self.board)
             },
             None => {
-                self.board.delete_square(coord)?;
+                self.board.delete_square(&coord)?;
                 return Ok(&self.board)
             },
         }

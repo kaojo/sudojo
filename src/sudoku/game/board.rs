@@ -8,6 +8,7 @@ use std::collections::HashSet;
 #[derive(Clone, Debug)]
 pub struct Board {
     data: HashMap<Coordinate, Square>,
+    turn_history: Vec<Coordinate>,
     initialized: bool,
     conflicts: bool,
 }
@@ -16,6 +17,7 @@ impl Board {
     pub fn new() -> Self {
         Board {
             data: HashMap::new(),
+            turn_history: Vec::new(),
             initialized: false,
             conflicts: false,
         }
@@ -36,25 +38,48 @@ impl Board {
                     "A Field with these coordinates allready exists!",
                 ));
             } else {
+                if self.initialized {
+                    self.turn_history.push(coord.clone());
+                }
                 self.data.insert(coord, square);
             }
             return self.get_state();
         }
     }
 
-    pub fn delete_square(&mut self, coord: Coordinate) -> Result<EGameState, String> {
+    pub fn delete_square(&mut self, coord: &Coordinate) -> Result<EGameState, String> {
         let mut error: bool = false;
-        match self.data.get(&coord) {
+        match self.data.get(coord) {
             Some(ref p) => if p.initial {
                 error = true;
             },
             None => (),
         }
         if error {
-            return Err(String::from("Deleting an initial square is not allowed."))
+            return Err(String::from("Deleting an initial square is not allowed."));
         }
         self.data.remove(&coord);
         self.get_state()
+    }
+
+    pub fn undo_last(&mut self) {
+        match self.turn_history.clone().len() {
+            0 => (),
+            n => {
+                let coord = &self.turn_history.clone()[n - 1];
+                self.delete_square(coord).expect("should allways work");
+                self.turn_history.remove(n - 1);
+            }
+        }
+    }
+
+    pub fn revert(&mut self) {
+        let cloned_data = self.data.clone();
+        for (coord, square) in cloned_data.iter() {
+            if !square.initial {
+                self.delete_square(&coord).expect("should allways work");
+            }
+        }
     }
 
     pub fn get_square(&self, coord: &Coordinate) -> Option<&Square> {

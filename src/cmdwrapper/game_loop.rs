@@ -32,10 +32,10 @@ impl GameLoop for Sudoku {
                     }
                 }
                 EActionType::Help => {parser.print_help()}
-                EActionType::Revert => {}
+                EActionType::Revert => {self.board.revert()}
                 EActionType::Solve => {}
                 EActionType::Suggest => {}
-                EActionType::Undo => {}
+                EActionType::Undo => {self.board.undo_last()}
                 EActionType::Quit => {self.app_state = EAppState::Exit}
                 _ => {
                     println!("Command '{}' not recognized.", raw_choice);
