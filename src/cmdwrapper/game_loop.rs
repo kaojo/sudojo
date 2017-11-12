@@ -23,14 +23,23 @@ impl GameLoop for Sudoku {
                         Ok(ref p) => println!("{}", p),
                     }
                 }
-                EActionType::Delete(ref p) => {}
-                EActionType::Help => {}
+                EActionType::Delete(ref p) => {
+                    let result = self.do_turn((p.clone(), None));
+                    match result {
+                        Err(ref p) => println!("Could not execute turn: {}", p),
+                        Ok(ref p) => println!("{}", p),
+                    }
+                }
+                EActionType::Help => {parser.print_help()}
                 EActionType::Revert => {}
                 EActionType::Solve => {}
                 EActionType::Suggest => {}
                 EActionType::Undo => {}
-                EActionType::Quit => {}
-                _ => {}
+                EActionType::Quit => {self.app_state = EAppState::Exit}
+                _ => {
+                    println!("Command '{}' not recognized.", raw_choice);
+                    println!("Enter 'h' to get help.");
+                }
             }
         }
     }

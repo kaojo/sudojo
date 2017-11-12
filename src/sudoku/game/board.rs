@@ -1,8 +1,8 @@
 use std::collections::HashMap;
-use super::{Coordinate, Square, EGameState};
-use super::rule::{HorizontalUniqueRule, VerticalUniqueRule, QuadrantUniqueRule};
+use super::{Coordinate, EGameState, Square};
+use super::rule::{HorizontalUniqueRule, QuadrantUniqueRule, VerticalUniqueRule};
 use std::fmt;
-use ansi_term::Colour::{Red, Cyan};
+use ansi_term::Colour::{Cyan, Red};
 use std::collections::HashSet;
 
 #[derive(Clone, Debug)]
@@ -38,14 +38,23 @@ impl Board {
             } else {
                 self.data.insert(coord, square);
             }
+            return self.get_state();
         }
-        if self.mark_conflicts() {
-            Ok(EGameState::Conflict)
-        } else if self.is_filled() {
-            Ok(EGameState::Finished)
-        } else {
-            Ok(EGameState::Ok)
+    }
+
+    pub fn delete_square(&mut self, coord: Coordinate) -> Result<EGameState, String> {
+        let mut error: bool = false;
+        match self.data.get(&coord) {
+            Some(ref p) => if p.initial {
+                error = true;
+            },
+            None => (),
         }
+        if error {
+            return Err(String::from("Deleting an initial square is not allowed."))
+        }
+        self.data.remove(&coord);
+        self.get_state()
     }
 
     pub fn get_square(&self, coord: &Coordinate) -> Option<&Square> {
@@ -56,7 +65,7 @@ impl Board {
         self.initialized = init;
     }
 
-    pub fn mark_conflicts(&mut self) -> bool {
+    fn mark_conflicts(&mut self) -> bool {
         let cloned_data = self.data.clone();
         let mut conflicts: HashSet<&Coordinate> = HashSet::new();
         for (coord, square) in cloned_data.iter() {
@@ -79,7 +88,7 @@ impl Board {
                 _ => (),
             }
         }
-        for coord in conflicts.iter()  {
+        for coord in conflicts.iter() {
             let square = self.data.get_mut(coord).expect("Should be in list.");
             square.conflict = true;
         }
@@ -90,6 +99,23 @@ impl Board {
     pub fn is_filled(&self) -> bool {
         println!("{} / 81 squares filled.", self.data.len());
         return 81 == self.data.len();
+    }
+
+    fn get_state(&mut self) -> Result<EGameState, String> {
+        self.reset_conflicts();
+        if self.mark_conflicts() {
+            Ok(EGameState::Conflict)
+        } else if self.is_filled() {
+            Ok(EGameState::Finished)
+        } else {
+            Ok(EGameState::Ok)
+        }
+    }
+
+    fn reset_conflicts(&mut self) {
+        for square in self.data.values_mut() {
+            square.conflict = false;
+        }
     }
 }
 

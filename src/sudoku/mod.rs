@@ -4,8 +4,8 @@ use sudojo_core::app::{App, AppState, EAppState, EStartChoice, Start, Tick, Turn
 pub mod game;
 
 pub struct Sudoku {
-    board: Board,
-    app_state: EAppState,
+    pub board: Board,
+    pub app_state: EAppState,
 }
 
 impl Sudoku {
@@ -17,7 +17,7 @@ impl Sudoku {
     }
 }
 
-impl App<(Coordinate, Square), Board> for Sudoku {}
+impl App<(Coordinate, Option<Square>), Board> for Sudoku {}
 
 impl Start for Sudoku {
     fn start(&mut self, start_choice: &Option<EStartChoice>) {
@@ -29,7 +29,6 @@ impl Start for Sudoku {
             }
             _ => println!("Choice not supported yet"),
         }
-        println!("{}", &self.board);
     }
 }
 
@@ -39,11 +38,19 @@ impl AppState for Sudoku {
     }
 }
 
-impl Turn<(Coordinate, Square), Board> for Sudoku {
-    fn do_turn(&mut self, turn: (Coordinate, Square)) -> Result<&Board, String>{
+impl Turn<(Coordinate, Option<Square>), Board> for Sudoku {
+    fn do_turn(&mut self, turn: (Coordinate, Option<Square>)) -> Result<&Board, String> {
         let (coord, square) = turn;
-        self.board.fill_square(coord, square)?;
-        Ok(&self.board)
+        match square {
+            Some(ref p) => {
+                self.board.fill_square(coord, p.clone())?;
+                return Ok(&self.board)
+            },
+            None => {
+                self.board.delete_square(coord)?;
+                return Ok(&self.board)
+            },
+        }
     }
 }
 

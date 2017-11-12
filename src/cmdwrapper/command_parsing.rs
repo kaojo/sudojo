@@ -2,7 +2,7 @@ use sudoku::game::{Coordinate, Square};
 use regex::Regex;
 
 pub enum EActionType {
-    Turn((Coordinate, Square)),
+    Turn((Coordinate, Option<Square>)),
     Undo,
     Delete(Coordinate),
     Revert,
@@ -67,7 +67,7 @@ impl CommandActionTypeParser {
     }
 }
 
-fn parse_turn(text: String) -> Option<(Coordinate, Square)> {
+fn parse_turn(text: String) -> Option<(Coordinate, Option<Square>)> {
     lazy_static! {
         static ref RE: Regex = Regex::new(r"^(?P<x>\d),(?P<y>\d),(?P<z>\d)$").unwrap();
     }
@@ -88,7 +88,7 @@ fn parse_turn(text: String) -> Option<(Coordinate, Square)> {
                 .as_str()
                 .parse::<u8>()
                 .expect("should be an integer");
-            Some((Coordinate::new(x, y), Square::new(z, false)))
+            Some((Coordinate::new(x, y), Some(Square::new(z, false))))
         }
         None => None,
     }
