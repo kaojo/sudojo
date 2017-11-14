@@ -1,4 +1,6 @@
 use super::{Coordinate, Square, Board, EGameState};
+use super::super::util::iterators::quadrant_iterator;
+use std::collections::{HashMap, HashSet};
 
 pub struct HorizontalUniqueRule {}
 
@@ -16,6 +18,20 @@ impl HorizontalUniqueRule {
             }
         }
         EGameState::Ok
+    }
+
+    pub fn get_disallowed_values(board: &Board) -> HashMap<u8, HashSet<u8>> {
+        let mut result: HashMap<u8, HashSet<u8>> = HashMap::new();
+        for y in 1..10 {
+            let mut row_result: HashSet<u8> = HashSet::new();
+            for x in 1..10 {
+                if let Some(ref p) = board.get_square(&Coordinate::new(x, y)) {
+                    row_result.insert(p.value);
+                }
+            }
+            result.insert(y, row_result);
+        }
+        result
     }
 }
 
@@ -35,6 +51,20 @@ impl VerticalUniqueRule {
             }
         }
         EGameState::Ok
+    }
+
+    pub fn get_disallowed_values(board: &Board) -> HashMap<u8, HashSet<u8>> {
+        let mut result: HashMap<u8, HashSet<u8>> = HashMap::new();
+        for x in 1..10 {
+            let mut column_result: HashSet<u8> = HashSet::new();
+            for y in 1..10 {
+                if let Some(ref p) = board.get_square(&Coordinate::new(x, y)) {
+                    column_result.insert(p.value);
+                }
+            }
+            result.insert(x, column_result);
+        }
+        result
     }
 }
 
@@ -58,5 +88,21 @@ impl QuadrantUniqueRule {
             }
         }
         EGameState::Ok
+    }
+
+    pub fn get_disallowed_values(board: &Board) -> HashMap<Coordinate, HashSet<u8>> {
+        let mut result: HashMap<Coordinate, HashSet<u8>> = HashMap::new();
+        for iterator in quadrant_iterator() {
+            let mut quadrant_result: HashSet<u8> = HashSet::new();
+            let q_x = iterator.q_x;
+            let q_y = iterator.q_y;
+            for (x, y) in iterator {
+                if let Some(ref p) = board.get_square(&Coordinate::new(x, y)) {
+                    quadrant_result.insert(p.value);
+                }
+            }
+            result.insert(Coordinate::new(q_x, q_y), quadrant_result);
+        }
+        result
     }
 }

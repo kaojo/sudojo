@@ -40,6 +40,7 @@ impl GameLoop for Sudoku {
                 EActionType::Suggest => {
                     let suggestion_controller : SuggestionController = SuggestionController::new(&self.board);
                     let possible_turns: HashSet<(Coordinate, Square)> = suggestion_controller.get_suggestions();
+                    println!("{:?}", possible_turns);
                 }
                 EActionType::Undo => {self.board.undo_last()}
                 EActionType::Quit => {self.app_state = EAppState::Exit}

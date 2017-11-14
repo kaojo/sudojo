@@ -15,7 +15,7 @@ impl SuggestionController {
 
     pub fn get_suggestions(&self) -> HashSet<(Coordinate, Square)> {
         let mut result = HashSet::new();
-
+        println!("{:?}", self.virtual_board);
 
         result
     }

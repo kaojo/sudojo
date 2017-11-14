@@ -3,6 +3,7 @@ use sudojo_core::app::{App, AppState, EAppState, EStartChoice, Start, Tick, Turn
 
 pub mod game;
 pub mod ai;
+pub mod util;
 
 pub struct Sudoku {
     pub board: Board,

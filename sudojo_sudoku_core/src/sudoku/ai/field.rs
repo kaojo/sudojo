@@ -16,12 +16,23 @@ impl Field {
         field.possible_values.insert(square.value);
         field
     }
-    pub fn from_value(value: u8) -> Self {
+    pub fn new() -> Self {
         let mut field = Field {
             possible_values: HashSet::new(),
             initial: false,
         };
-        field.possible_values.insert(value);
+        for x in 1..10 {
+            field.possible_values.insert(x);
+        }
+
         field
+    }
+
+    pub fn get_possible_values(&self) -> &HashSet<u8> {
+        &self.possible_values
+    }
+
+    pub fn disallow_value(&mut self, value: u8) {
+        self.possible_values.remove(&value);
     }
 }
