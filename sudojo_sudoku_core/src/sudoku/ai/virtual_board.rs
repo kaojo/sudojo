@@ -60,4 +60,12 @@ impl VirtualBoard {
 
         v_board
     }
+
+    pub fn get_field(&self, coord: &Coordinate) -> Option<&Field> {
+        self.data.get(coord)
+    }
+
+    pub fn get_data(&self) -> &HashMap<Coordinate, Field> {
+        &self.data
+    }
 }

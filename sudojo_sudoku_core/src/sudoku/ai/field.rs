@@ -35,4 +35,12 @@ impl Field {
     pub fn disallow_value(&mut self, value: u8) {
         self.possible_values.remove(&value);
     }
+
+    pub fn is_initial(&self) -> bool {
+        self.initial
+    }
+
+    pub fn has_possible_value(&self, value: &u8) -> bool {
+        self.possible_values.contains(value)
+    }
 }

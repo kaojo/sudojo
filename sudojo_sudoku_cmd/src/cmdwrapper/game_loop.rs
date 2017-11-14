@@ -34,16 +34,35 @@ impl GameLoop for Sudoku {
                         Ok(_) => (),
                     }
                 }
-                EActionType::Help => {parser.print_help()}
-                EActionType::Revert => {self.board.revert()}
-                EActionType::Solve => {}
-                EActionType::Suggest => {
-                    let suggestion_controller : SuggestionController = SuggestionController::new(&self.board);
-                    let possible_turns: HashSet<(Coordinate, Square)> = suggestion_controller.get_suggestions();
-                    println!("{:?}", possible_turns);
+                EActionType::Help => { parser.print_help() }
+                EActionType::Revert => { self.board.revert() }
+                EActionType::Solve => {
+                    let mut suggestion_controller: SuggestionController = SuggestionController::new(&self.board);
+                    while !suggestion_controller.get_suggestions().is_empty() {
+                        for suggestion in suggestion_controller.get_suggestions() {
+                            let (coord, square) = suggestion;
+                            match self.board.fill_square(coord, square) {
+                                Ok(_) => (),
+                                Err(e) => {
+                                    println!("{}", e);
+                                    break;
+                                }
+                            }
+                        }
+                        println!("{}", self.board);
+                        suggestion_controller = SuggestionController::new(&self.board);
+                    }
                 }
-                EActionType::Undo => {self.board.undo_last()}
-                EActionType::Quit => {self.app_state = EAppState::Exit}
+                EActionType::Suggest => {
+                    let suggestion_controller: SuggestionController = SuggestionController::new(&self.board);
+                    let possible_turns: HashSet<(Coordinate, Square)> = suggestion_controller.get_suggestions();
+                    for suggestion in possible_turns.into_iter() {
+                        let (coord, square) = suggestion;
+                        println!("{},{},{}", coord.x, coord.y, square.value)
+                    }
+                }
+                EActionType::Undo => { self.board.undo_last() }
+                EActionType::Quit => { self.app_state = EAppState::Exit }
                 _ => {
                     println!("Command '{}' not recognized.", raw_choice);
                     println!("Enter 'h' to get help.");
