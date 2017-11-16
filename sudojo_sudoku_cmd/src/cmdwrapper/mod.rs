@@ -25,12 +25,12 @@ impl Start for AppStarter {
     fn start(&mut self, start_choice: &Option<EStartChoice>) {
         match *start_choice {
             Some(ref p) => {
-                println!("Start choice is given: {:?}", p);
+                info!("Start choice is given: {:?}", p);
                 self.app.start(start_choice);
             }
             None => {
                 let mut choice = get_start_choice();
-                println!("{:?}", choice);
+                info!("{:?}", choice);
                 while let EStartChoice::Invalid = choice {
                     choice = get_start_choice();
                 }
@@ -48,11 +48,11 @@ impl AppState for AppStarter {
 }
 
 fn get_start_choice() -> EStartChoice {
-    println!("What do you want to do ?");
-    println!("1) Start a new game.");
-    println!("2) Continue last game.");
-    println!("3) Quit.");
-    println!("[1]: ");
+    info!("What do you want to do ?");
+    info!("1) Start a new game.");
+    info!("2) Continue last game.");
+    info!("3) Quit.");
+    info!("[1]: ");
 
     let mut choice = String::new();
 
@@ -63,19 +63,19 @@ fn get_start_choice() -> EStartChoice {
     let result: EStartChoice;
     match choice.trim() {
         "" | "1" => {
-            println!("Starting new game!");
+            info!("Starting new game!");
             result = EStartChoice::NewGame
         }
         "2" => {
-            println!("Continue last game");
+            info!("Continue last game");
             result = EStartChoice::LoadGame
         }
         "3" => {
-            println!("Quiting.");
+            info!("Quiting.");
             process::exit(0);
         }
         _ => {
-            println!("Invalid input");
+            info!("Invalid input");
             result = EStartChoice::Invalid
         }
     }

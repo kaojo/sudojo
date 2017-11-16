@@ -25,10 +25,10 @@ impl Start for Sudoku {
     fn start(&mut self, start_choice: &Option<EStartChoice>) {
         match *start_choice {
             Some(EStartChoice::NewGame) => {
-                println!("Starting new game!");
+                info!("Starting new game!");
                 init(&mut self.board);
             }
-            _ => println!("Choice not supported yet"),
+            _ => info!("Choice not supported yet"),
         }
     }
 }

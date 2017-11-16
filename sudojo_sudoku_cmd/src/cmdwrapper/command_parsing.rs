@@ -17,16 +17,16 @@ pub struct CommandActionTypeParser {}
 
 impl CommandActionTypeParser {
     pub fn print_help(&self) {
-        println!("To perform an action first enter the type of action you want to perform");
-        println!("t x,y,z - (x,y) are coordinates, z is the value for the square. 't' can be omitted since it is the default command.");
-        println!("u - undo last turn");
-        println!("d [x,y] - delete a square");
-        println!("r - revert everything");
-        println!("c - complete next turn for me");
-        println!("s - solve sudoku for me");
-        println!("q - quit the current game and go back to main menu");
-        println!("h - print this help text");
-        println!("");
+        info!("To perform an action first enter the type of action you want to perform");
+        info!("t x,y,z - (x,y) are coordinates, z is the value for the square. 't' can be omitted since it is the default command.");
+        info!("u - undo last turn");
+        info!("d [x,y] - delete a square");
+        info!("r - revert everything");
+        info!("c - complete next turn for me");
+        info!("s - solve sudoku for me");
+        info!("q - quit the current game and go back to main menu");
+        info!("h - print this help text");
+        info!("");
     }
 
     pub fn get_action_type(&self, raw_command: &String) -> EActionType {

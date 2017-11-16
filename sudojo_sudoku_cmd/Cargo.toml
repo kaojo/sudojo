@@ -8,3 +8,4 @@ sudojo_core = {path = "../sudojo_core", version = "0.1.0"}
 sudojo_sudoku_core = {path = "../sudojo_sudoku_core", version = "0.1.0"}
 regex = "0.2"
 lazy_static = "0.2.9"
+log = "0.3.7"

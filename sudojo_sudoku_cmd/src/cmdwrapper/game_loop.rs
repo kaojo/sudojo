@@ -16,21 +16,21 @@ impl GameLoop for Sudoku {
         let parser = CommandActionTypeParser {};
         parser.print_help();
         while self.get_state() == &EAppState::Running {
-            println!("{}", self.board);
+            info!("{}", self.board);
             let raw_choice = get_raw_cmd();
             let cmd_type = parser.get_action_type(&raw_choice);
             match cmd_type {
                 EActionType::Turn(ref p) => {
                     let result = self.do_turn(p.clone());
                     match result {
-                        Err(ref p) => println!("Could not execute turn: {}", p),
+                        Err(ref p) => info!("Could not execute turn: {}", p),
                         Ok(_) => (),
                     }
                 }
                 EActionType::Delete(ref p) => {
                     let result = self.do_turn((p.clone(), None));
                     match result {
-                        Err(ref p) => println!("Could not execute turn: {}", p),
+                        Err(ref p) => info!("Could not execute turn: {}", p),
                         Ok(_) => (),
                     }
                 }
@@ -45,14 +45,14 @@ impl GameLoop for Sudoku {
                     let possible_turns: HashSet<(Coordinate, Square)> = suggestion_controller.get_suggestions();
                     for suggestion in possible_turns.into_iter() {
                         let (coord, square) = suggestion;
-                        println!("{},{},{}", coord.x, coord.y, square.value)
+                        info!("{},{},{}", coord.x, coord.y, square.value)
                     }
                 }
                 EActionType::Undo => { self.board.undo_last() }
                 EActionType::Quit => { self.app_state = EAppState::Exit }
                 _ => {
-                    println!("Command '{}' not recognized.", raw_choice);
-                    println!("Enter 'h' to get help.");
+                    info!("Command '{}' not recognized.", raw_choice);
+                    info!("Enter 'h' to get help.");
                 }
             }
         }

@@ -1,6 +1,8 @@
 pub mod sudoku;
 extern crate ansi_term;
 extern crate sudojo_core;
+#[macro_use]
+extern crate log;
 
 #[cfg(test)]
 mod tests {

@@ -126,7 +126,7 @@ impl Board {
     }
 
     pub fn is_filled(&self) -> bool {
-        println!("{} / 81 squares filled.", self.data.len());
+        debug!("{} / 81 squares filled.", self.data.len());
         return 81 == self.data.len();
     }
 

@@ -43,12 +43,12 @@ fn do_solving_iteration(mut board: Board) -> Board {
                     ()
                 }
                 Err(e) => {
-                    println!("{}", e);
+                    info!("{}", e);
                     break;
                 }
             }
         }
-        // println!("{}", board);
+        debug!("{}", board);
         suggestion_controller = SuggestionController::new(&board);
     }
 

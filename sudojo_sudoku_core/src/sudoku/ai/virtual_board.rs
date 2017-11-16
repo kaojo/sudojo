@@ -61,7 +61,7 @@ impl VirtualBoard {
         }
 
         VirtualBoard::remove_row_quad_comb_rule(&mut v_board);
-        println!("{}", v_board);
+        debug!("{}", v_board);
         v_board
     }
 
@@ -79,7 +79,7 @@ impl VirtualBoard {
                         if qy != coord.y {
                             let removed = v_board.data.get_mut(&Coordinate::new(qx, qy)).expect("").disallow_value(*value);
                             if removed {
-                                println!("{:?}, {}, {}, {}, {}", coord, qx, qy, value, removed);
+                                debug!("{:?}, {}, {}, {}, {}", coord, qx, qy, value, removed);
                             }
                         }
                     }
@@ -90,7 +90,7 @@ impl VirtualBoard {
                         if qx != coord.x {
                             let removed = v_board.data.get_mut(&Coordinate::new(qx, qy)).expect("").disallow_value(*value);
                             if removed {
-                                println!("{:?}, {}, {}, {}, {}", coord, qx, qy, value, removed);
+                                debug!("{:?}, {}, {}, {}, {}", coord, qx, qy, value, removed);
                             }
                         }
                     }
@@ -130,7 +130,9 @@ impl fmt::Display for VirtualBoard {
                 }
                 writeln!(f);
             }
-            writeln!(f);
+            if [3, 6, 9].contains(&y) {
+                writeln!(f);
+            }
         }
 
         writeln!(f)

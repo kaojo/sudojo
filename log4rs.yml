@@ -1,0 +1,54 @@
+# Scan this file for changes every 30 seconds
+refresh_rate: 30 seconds
+
+appenders:
+  stdout:
+    kind: console
+    encoder:
+      pattern: "{m}{n}"
+    filters:
+    - kind: threshold
+      level: info
+
+  log:
+    kind: file
+    path: "log/log.log"
+    encoder:
+      pattern: "{d(%Y-%m-%d %H:%M:%S)} {h({l})} {t}:{L} - {m}{n}"
+
+  debug:
+    kind: file
+    path: "log/debug.log"
+    encoder:
+      pattern: "{d(%Y-%m-%d %H:%M:%S)} {h({l})} {t}:{L} - {m}{n}"
+
+root:
+  level: info
+  appenders:
+    - stdout
+    - log
+
+loggers:
+  sudojo:
+    level: debug
+    appenders:
+      - debug
+    additive: true
+
+  sudojo_core:
+    level: debug
+    appenders:
+      - debug
+    additive: true
+
+  sudojo_sudoku_cmd:
+    level: debug
+    appenders:
+      - debug
+    additive: true
+
+  sudojo_sudoku_core:
+    level: debug
+    appenders:
+      - debug
+    additive: true
