@@ -1,5 +1,5 @@
 use sudojo_core::app::{AppState, EAppState, Turn};
-use sudojo_sudoku_core::sudoku::ai::SuggestionController;
+use sudojo_sudoku_core::sudoku::ai::{SuggestionController, SolveController};
 use sudojo_sudoku_core::sudoku::Sudoku;
 use sudojo_sudoku_core::sudoku::game::{Coordinate, Square};
 use std::io;
@@ -37,21 +37,8 @@ impl GameLoop for Sudoku {
                 EActionType::Help => { parser.print_help() }
                 EActionType::Revert => { self.board.revert() }
                 EActionType::Solve => {
-                    let mut suggestion_controller: SuggestionController = SuggestionController::new(&self.board);
-                    while !suggestion_controller.get_suggestions().is_empty() {
-                        for suggestion in suggestion_controller.get_suggestions() {
-                            let (coord, square) = suggestion;
-                            match self.board.fill_square(coord, square) {
-                                Ok(_) => (),
-                                Err(e) => {
-                                    println!("{}", e);
-                                    break;
-                                }
-                            }
-                        }
-                        println!("{}", self.board);
-                        suggestion_controller = SuggestionController::new(&self.board);
-                    }
+                    let sc = SolveController::new();
+                    self.board = sc.solve(&self.board);
                 }
                 EActionType::Suggest => {
                     let suggestion_controller: SuggestionController = SuggestionController::new(&self.board);

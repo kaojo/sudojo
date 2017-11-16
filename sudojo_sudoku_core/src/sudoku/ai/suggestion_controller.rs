@@ -1,6 +1,6 @@
 use super::VirtualBoard;
 use super::super::game::{Board, Coordinate, Square};
-use super::super::util::iterators::{board_iterator, quadrant_squares_iterator};
+use super::super::util::iterators::{board_iterator, QuadrantSquaresIterator};
 use std::collections::HashSet;
 
 pub struct SuggestionController {
@@ -65,10 +65,8 @@ impl SuggestionController {
 
     fn count_quarter(&self, value: &u8, x: &u8, y: &u8) -> u8 {
         let mut count: u8 = 0;
-        let x_quadrant = (*x as f32 / 3 as f32).ceil() as u8;
-        let y_quadrant = (*y as f32 / 3 as f32).ceil() as u8;
 
-        for (qx, qy) in quadrant_squares_iterator(x_quadrant, y_quadrant) {
+        for (qx, qy) in QuadrantSquaresIterator::from_board_coordinates(*x, *y) {
             let field = self.virtual_board.get_field(&Coordinate::new(qx, qy)).expect("Should be there");
             if field.has_possible_value(value) {
                 count += 1;

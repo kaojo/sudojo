@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use super::{Coordinate, EGameState, Square};
 use super::rule::{HorizontalUniqueRule, QuadrantUniqueRule, VerticalUniqueRule};
 use std::fmt;
-use ansi_term::Colour::{Cyan, Red};
+use ansi_term::Colour::{Cyan, Red, Green, Purple};
 use std::collections::HashSet;
 
 #[derive(Clone, Debug)]
@@ -43,7 +43,7 @@ impl Board {
                 }
                 self.data.insert(coord, square);
             }
-            return self.get_state();
+            return Ok(self.get_state());
         }
     }
 
@@ -59,7 +59,7 @@ impl Board {
             return Err(String::from("Deleting an initial square is not allowed."));
         }
         self.data.remove(&coord);
-        self.get_state()
+        Ok(self.get_state())
     }
 
     pub fn undo_last(&mut self) {
@@ -121,7 +121,7 @@ impl Board {
             let square = self.data.get_mut(coord).expect("Should be in list.");
             square.conflict = true;
         }
-        self.conflicts = conflicts.is_empty();
+        self.conflicts = !conflicts.is_empty();
         self.conflicts
     }
 
@@ -130,14 +130,14 @@ impl Board {
         return 81 == self.data.len();
     }
 
-    fn get_state(&mut self) -> Result<EGameState, String> {
+    pub fn get_state(&mut self) -> EGameState {
         self.reset_conflicts();
         if self.mark_conflicts() {
-            Ok(EGameState::Conflict)
+            EGameState::Conflict
         } else if self.is_filled() {
-            Ok(EGameState::Finished)
+            EGameState::Finished
         } else {
-            Ok(EGameState::Ok)
+            EGameState::Ok
         }
     }
 
@@ -170,8 +170,12 @@ impl fmt::Display for Board {
                             let mut digit = p.value.to_string();
                             if p.initial {
                                 digit = Cyan.paint(digit).to_string();
-                            } else if p.conflict {
+                            } else if p.conflict && !p.generated {
                                 digit = Red.paint(digit).to_string();
+                            } else if p.conflict && p.generated {
+                                digit = Purple.paint(digit).to_string();
+                            } else if p.generated {
+                                digit = Green.paint(digit).to_string();
                             }
                             String::from(digit)
                         }

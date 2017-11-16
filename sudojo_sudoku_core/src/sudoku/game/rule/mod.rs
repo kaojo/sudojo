@@ -1,5 +1,6 @@
 use super::{Coordinate, Square, Board, EGameState};
 use super::super::util::iterators::quadrant_iterator;
+use super::super::ai::VirtualBoard;
 use std::collections::{HashMap, HashSet};
 
 pub struct HorizontalUniqueRule {}
@@ -104,5 +105,102 @@ impl QuadrantUniqueRule {
             result.insert(Coordinate::new(q_x, q_y), quadrant_result);
         }
         result
+    }
+}
+
+pub struct RowQuadrantCombinationRule {}
+
+impl RowQuadrantCombinationRule {
+    pub fn is_exclusive_in_quadrant_horizontally(v_board: &VirtualBoard, coord: &Coordinate, value: &u8) -> bool {
+        for x in 1..10 {
+            let x_quadrant = (coord.x as f32 / 3 as f32).ceil() as u8;
+            //not in same quadrant
+            if !(((x_quadrant - 1) * 3 + 1) <= x && x <= (x_quadrant * 3)) {
+                if let Some(p) = v_board.get_field(&Coordinate::new(x, coord.y)) {
+                    if p.get_possible_values().contains(value) {
+                        return false;
+                    }
+                }
+            }
+        }
+        true
+    }
+    pub fn is_exclusive_in_quadrant_vertically(v_board: &VirtualBoard, coord: &Coordinate, value: &u8) -> bool {
+        for y in 1..10 {
+            let y_quadrant = (coord.y as f32 / 3 as f32).ceil() as u8;
+            //not in same quadrant
+            if !(((y_quadrant - 1) * 3 + 1) <= y && y <= (y_quadrant * 3)) {
+                if let Some(p) = v_board.get_field(&Coordinate::new(coord.x, y)) {
+                    if p.get_possible_values().contains(value) {
+                        return false;
+                    }
+                }
+            }
+        }
+        true
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use super::super::super::ai::Field;
+    use super::super::super::util::iterators::board_iterator;
+
+    #[test]
+    fn is_exclusive_in_quadrant_horizontally() {
+        let mut map: HashMap<Coordinate, Field> = HashMap::new();
+        let mut set: HashSet<u8> = HashSet::new();
+        set.insert(1);
+        //is unique in quadrant
+        map.insert(Coordinate::new(1, 1), Field::from_possible_values(set.clone()));
+        // following values should be removed
+        map.insert(Coordinate::new(1, 2), Field::from_possible_values(set.clone()));
+        map.insert(Coordinate::new(2, 2), Field::from_possible_values(set.clone()));
+        map.insert(Coordinate::new(5, 2), Field::from_possible_values(set.clone()));
+        map.insert(Coordinate::new(9, 2), Field::from_possible_values(set.clone()));
+        map.insert(Coordinate::new(3, 3), Field::from_possible_values(set.clone()));
+        // is not unique in quadrant
+
+        let board = VirtualBoard::from(map);
+        let coord_1_1 = Coordinate::new(1, 1);
+        assert!(RowQuadrantCombinationRule::is_exclusive_in_quadrant_horizontally(&board, &coord_1_1, &1));
+        let coord_1_2 = Coordinate::new(1, 2);
+        assert!(!RowQuadrantCombinationRule::is_exclusive_in_quadrant_horizontally(&board, &coord_1_2, &1));
+        let coord_4_1 = Coordinate::new(4, 1);
+        assert!(!RowQuadrantCombinationRule::is_exclusive_in_quadrant_horizontally(&board, &coord_4_1, &1));
+        let coord_4_2 = Coordinate::new(4, 2);
+        assert!(!RowQuadrantCombinationRule::is_exclusive_in_quadrant_horizontally(&board, &coord_4_2, &1));
+    }
+
+    #[test]
+    fn is_exclusive_in_quadrant_vertically() {
+        let mut map: HashMap<Coordinate, Field> = HashMap::new();
+        let mut set: HashSet<u8> = HashSet::new();
+        set.insert(9);
+
+        for (x, y) in board_iterator() {
+            map.insert(Coordinate::new(x, y), Field::from_possible_values(set.clone()));
+        }
+        set.remove(&9);
+        set.insert(1);
+        set.insert(2);
+        map.insert(Coordinate::new(6, 1), Field::from_possible_values(set.clone()));
+        map.insert(Coordinate::new(6, 2), Field::from_possible_values(set.clone()));
+        map.insert(Coordinate::new(6, 3), Field::from_possible_values(set.clone()));
+        map.insert(Coordinate::new(6, 7), Field::from_possible_values(set.clone()));
+        map.insert(Coordinate::new(6, 8), Field::from_possible_values(set.clone()));
+        map.insert(Coordinate::new(6, 9), Field::from_possible_values(set.clone()));
+
+        let board = VirtualBoard::from(map);
+        assert!(!RowQuadrantCombinationRule::is_exclusive_in_quadrant_vertically(&board, &Coordinate::new(6, 1), &9));
+        assert!(!RowQuadrantCombinationRule::is_exclusive_in_quadrant_vertically(&board, &Coordinate::new(6, 2), &9));
+        assert!(!RowQuadrantCombinationRule::is_exclusive_in_quadrant_vertically(&board, &Coordinate::new(6, 3), &9));
+        assert!(RowQuadrantCombinationRule::is_exclusive_in_quadrant_vertically(&board, &Coordinate::new(6, 4), &9));
+        assert!(RowQuadrantCombinationRule::is_exclusive_in_quadrant_vertically(&board, &Coordinate::new(6, 5), &9));
+        assert!(RowQuadrantCombinationRule::is_exclusive_in_quadrant_vertically(&board, &Coordinate::new(6, 6), &9));
+        assert!(!RowQuadrantCombinationRule::is_exclusive_in_quadrant_vertically(&board, &Coordinate::new(6, 7), &9));
+        assert!(!RowQuadrantCombinationRule::is_exclusive_in_quadrant_vertically(&board, &Coordinate::new(6, 8), &9));
+        assert!(!RowQuadrantCombinationRule::is_exclusive_in_quadrant_vertically(&board, &Coordinate::new(6, 9), &9));
     }
 }

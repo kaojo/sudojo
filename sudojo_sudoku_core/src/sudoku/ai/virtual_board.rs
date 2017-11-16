@@ -1,8 +1,10 @@
 use std::collections::{HashMap, HashSet};
 use super::super::game::{Coordinate, Board};
-use super::super::game::rule::{HorizontalUniqueRule, VerticalUniqueRule, QuadrantUniqueRule};
+use super::super::game::rule::{HorizontalUniqueRule, VerticalUniqueRule, QuadrantUniqueRule, RowQuadrantCombinationRule};
 use super::Field;
-use super::super::util::iterators::board_iterator;
+use super::super::util::iterators::{board_iterator, QuadrantSquaresIterator};
+use std::fmt;
+use ansi_term::Colour::{Cyan, Red, Green, Purple};
 
 #[derive(Debug)]
 pub struct VirtualBoard {
@@ -58,7 +60,49 @@ impl VirtualBoard {
             }
         }
 
+        VirtualBoard::remove_row_quad_comb_rule(&mut v_board);
+        println!("{}", v_board);
         v_board
+    }
+
+    fn remove_row_quad_comb_rule(v_board: &mut VirtualBoard) {
+        for (x, y) in board_iterator() {
+            let coord = Coordinate::new(x, y);
+            let field = v_board.data.get(&coord).expect("All fields should be initialized by now.").clone();
+            if field.is_initial() {
+                continue;
+            }
+            for value in field.get_possible_values() {
+                let exclusive_in_quadrant_horizontally: bool = RowQuadrantCombinationRule::is_exclusive_in_quadrant_horizontally(&v_board, &coord, &value);
+                if exclusive_in_quadrant_horizontally {
+                    for (qx, qy) in QuadrantSquaresIterator::from_board_coordinates(coord.x, coord.y) {
+                        if qy != coord.y {
+                            let removed = v_board.data.get_mut(&Coordinate::new(qx, qy)).expect("").disallow_value(*value);
+                            if removed {
+                                println!("{:?}, {}, {}, {}, {}", coord, qx, qy, value, removed);
+                            }
+                        }
+                    }
+                }
+                let exclusive_in_quadrant_vertically: bool = RowQuadrantCombinationRule::is_exclusive_in_quadrant_vertically(&v_board, &coord, &value);
+                if exclusive_in_quadrant_vertically {
+                    for (qx, qy) in QuadrantSquaresIterator::from_board_coordinates(coord.x, coord.y) {
+                        if qx != coord.x {
+                            let removed = v_board.data.get_mut(&Coordinate::new(qx, qy)).expect("").disallow_value(*value);
+                            if removed {
+                                println!("{:?}, {}, {}, {}, {}", coord, qx, qy, value, removed);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    pub fn from(data: HashMap<Coordinate, Field>) -> Self {
+        VirtualBoard {
+            data
+        }
     }
 
     pub fn get_field(&self, coord: &Coordinate) -> Option<&Field> {
@@ -68,4 +112,44 @@ impl VirtualBoard {
     pub fn get_data(&self) -> &HashMap<Coordinate, Field> {
         &self.data
     }
+}
+
+impl fmt::Display for VirtualBoard {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        for y in 1..10 {
+            for i in 1..4 {
+                for x in 1..10 {
+                    let field = self.data.get(&Coordinate::new(x, y));
+                    write!(f, " | ");
+                    for value in ((i - 1) * 3 + 1)..(i * 3 + 1) {
+                        write_single_value(f, field, value);
+                    }
+                    if [3, 6, 9].contains(&x) {
+                        write!(f, " |");
+                    }
+                }
+                writeln!(f);
+            }
+            writeln!(f);
+        }
+
+        writeln!(f)
+    }
+}
+
+fn write_single_value(f: &mut fmt::Formatter, field: Option<&Field>, value: u8) {
+    write!(f, "{}", match field {
+        None => String::from(" "),
+        Some(p) => {
+            if p.get_possible_values().contains(&value) {
+                if p.is_initial() {
+                    Cyan.paint(value.to_string()).to_string()
+                } else {
+                    Green.paint(value.to_string()).to_string()
+                }
+            } else {
+                String::from(" ")
+            }
+        }
+    });
 }

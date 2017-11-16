@@ -121,3 +121,18 @@ pub fn quadrant_squares_iterator(q_x: u8, q_y: u8) -> QuadrantSquaresIterator {
         next_y: (q_y - 1) * 3 + 1,
     }
 }
+ impl QuadrantSquaresIterator {
+     pub fn from_board_coordinates(b_x: u8, b_y: u8) -> QuadrantSquaresIterator {
+         let q_x = (b_x as f32 / 3 as f32).ceil() as u8;
+         let q_y = (b_y as f32 / 3 as f32).ceil() as u8;
+
+         QuadrantSquaresIterator {
+             q_x,
+             q_y,
+             x: (q_x - 1) * 3 + 1,
+             next_x: (q_x - 1) * 3 + 1,
+             y: (q_y - 1) * 3 + 1,
+             next_y: (q_y - 1) * 3 + 1,
+         }
+     }
+ }

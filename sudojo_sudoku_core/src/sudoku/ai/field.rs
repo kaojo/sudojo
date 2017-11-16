@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 use super::super::game::Square;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Field {
     possible_values: HashSet<u8>,
     initial: bool,
@@ -27,13 +27,19 @@ impl Field {
 
         field
     }
+    pub fn from_possible_values(values: HashSet<u8>) -> Self {
+        Field {
+            possible_values: values,
+            initial: false,
+        }
+    }
 
     pub fn get_possible_values(&self) -> &HashSet<u8> {
         &self.possible_values
     }
 
-    pub fn disallow_value(&mut self, value: u8) {
-        self.possible_values.remove(&value);
+    pub fn disallow_value(&mut self, value: u8) -> bool {
+        self.possible_values.remove(&value)
     }
 
     pub fn is_initial(&self) -> bool {
