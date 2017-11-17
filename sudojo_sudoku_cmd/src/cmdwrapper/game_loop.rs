@@ -16,7 +16,11 @@ impl GameLoop for Sudoku {
         let parser = CommandActionTypeParser {};
         parser.print_help();
         while self.get_state() == &EAppState::Running {
+            self.board.mark_conflicts();
             info!("{}", self.board);
+            if self.board.is_filled() {
+                print_success_message();
+            }
             let raw_choice = get_raw_cmd();
             let cmd_type = parser.get_action_type(&raw_choice);
             match cmd_type {
@@ -66,4 +70,18 @@ fn get_raw_cmd() -> String {
         .read_line(&mut choice)
         .expect("Could not read line.");
     choice
+}
+
+fn print_success_message() {
+    println!(r"
+
+   _____ _    _  _____ _____ ______  _____ _____
+  / ____| |  | |/ ____/ ____|  ____|/ ____/ ____|
+ | (___ | |  | | |   | |    | |__  | (___| (___
+  \___ \| |  | | |   | |    |  __|  \___ \\___ \
+  ____) | |__| | |___| |____| |____ ____) |___) |
+ |_____/ \____/ \_____\_____|______|_____/_____/
+
+
+")
 }

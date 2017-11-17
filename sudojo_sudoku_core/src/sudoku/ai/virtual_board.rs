@@ -116,6 +116,7 @@ impl VirtualBoard {
 
 impl fmt::Display for VirtualBoard {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let _ = writeln!(f, "VirtualBoard");
         for y in 1..10 {
             for i in 1..4 {
                 for x in 1..10 {

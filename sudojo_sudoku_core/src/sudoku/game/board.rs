@@ -24,6 +24,7 @@ impl Board {
     }
 
     pub fn fill_square(&mut self, coord: Coordinate, square: Square) -> Result<EGameState, String> {
+        debug!("{:?}, {:?}", coord, square);
         if self.initialized && square.initial {
             return Err(String::from(
                 "Initializing squares in the board is only allowed during init phase.",
@@ -94,7 +95,8 @@ impl Board {
         &self.data
     }
 
-    fn mark_conflicts(&mut self) -> bool {
+    pub fn mark_conflicts(&mut self) -> bool {
+        self.reset_conflicts();
         let cloned_data = self.data.clone();
         let mut conflicts: HashSet<&Coordinate> = HashSet::new();
         for (coord, square) in cloned_data.iter() {
@@ -125,14 +127,38 @@ impl Board {
         self.conflicts
     }
 
+    fn has_conflicts(&self) -> bool {
+        let cloned_data = self.data.clone();
+        for (coord, square) in cloned_data.iter() {
+            match HorizontalUniqueRule::apply(&coord, &square, &self) {
+                EGameState::Conflict => {
+                    return true;
+                }
+                _ => (),
+            }
+            match VerticalUniqueRule::apply(&coord, &square, &self) {
+                EGameState::Conflict => {
+                    return true;
+                }
+                _ => (),
+            }
+            match QuadrantUniqueRule::apply(&coord, &square, &self) {
+                EGameState::Conflict => {
+                    return true;
+                }
+                _ => (),
+            }
+        }
+        false
+    }
+
     pub fn is_filled(&self) -> bool {
         debug!("{} / 81 squares filled.", self.data.len());
         return 81 == self.data.len();
     }
 
-    pub fn get_state(&mut self) -> EGameState {
-        self.reset_conflicts();
-        if self.mark_conflicts() {
+    pub fn get_state(&self) -> EGameState {
+        if self.has_conflicts() {
             EGameState::Conflict
         } else if self.is_filled() {
             EGameState::Finished
