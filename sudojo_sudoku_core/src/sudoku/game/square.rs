@@ -5,6 +5,7 @@ pub struct Square {
     pub initial: bool,
     pub conflict: bool,
     pub generated: bool,
+    pub guessed: bool,
 }
 
 impl Square {
@@ -14,14 +15,25 @@ impl Square {
             initial: initial,
             conflict: false,
             generated: false,
+            guessed: false,
         }
     }
-    pub fn generate(value: u8, initial: bool) -> Self {
+    pub fn generate(value: u8) -> Self {
         Square {
             value: value,
-            initial: initial,
+            initial: false,
             conflict: false,
             generated: true,
+            guessed: false,
+        }
+    }
+    pub fn guess(value: u8) -> Self {
+        Square {
+            value: value,
+            initial: false,
+            conflict: false,
+            generated: true,
+            guessed: true,
         }
     }
 }

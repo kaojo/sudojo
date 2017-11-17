@@ -22,7 +22,7 @@ impl SuggestionController {
                 let possible_values: &HashSet<u8> = p.get_possible_values();
                 if !p.is_initial() && possible_values.len() == 1 {
                     let value = possible_values.iter().next().expect("should be there");
-                    result.insert((Coordinate::new(x, y), Square::generate(*value, false)));
+                    result.insert((Coordinate::new(x, y), Square::generate(*value)));
                 }
             }
         }
@@ -32,7 +32,7 @@ impl SuggestionController {
             let y = coord.y;
             for value in field.get_possible_values().iter() {
                 if !field.is_initial() && (self.count_horizontal(value, &y) == 1 || self.count_vertical(value, &x) == 1 || self.count_quarter(value, &x, &y) == 1) {
-                    result.insert((Coordinate::new(x, y), Square::generate(*value, false)));
+                    result.insert((Coordinate::new(x, y), Square::generate(*value)));
                     break;
                 }
             }

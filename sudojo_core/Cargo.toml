@@ -4,4 +4,3 @@ version = "0.1.0"
 authors = ["kaojo <mail@kaojo.de>"]
 
 [dependencies]
-log = "0.3.7"

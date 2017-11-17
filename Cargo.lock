@@ -288,9 +288,6 @@ dependencies = [
 [[package]]
 name = "sudojo_core"
 version = "0.1.0"
-dependencies = [
- "log 0.3.8 (registry+https://github.com/rust-lang/crates.io-index)",
-]
 
 [[package]]
 name = "sudojo_sudoku_cmd"
