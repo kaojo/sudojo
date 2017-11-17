@@ -5,11 +5,10 @@ extern crate log4rs;
 extern crate log;
 
 use sudojo_sudoku_cmd::cmdwrapper;
-use sudojo_core::app::Start;
 
 fn main() {
     log4rs::init_file("log4rs.yml", Default::default()).unwrap();
     info!("Starting sudojo!");
     let mut app_starter = cmdwrapper::AppStarter::new();
-    app_starter.start(&None);
+    app_starter.start();
 }

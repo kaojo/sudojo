@@ -22,9 +22,9 @@ impl Sudoku {
 impl App<(Coordinate, Option<Square>), Board> for Sudoku {}
 
 impl Start for Sudoku {
-    fn start(&mut self, start_choice: &Option<EStartChoice>) {
-        match *start_choice {
-            Some(EStartChoice::NewGame) => {
+    fn start(&mut self, start_choice: EStartChoice) {
+        match start_choice {
+            EStartChoice::NewGame(_) => {
                 info!("Starting new game!");
                 init(&mut self.board);
             }
@@ -45,12 +45,12 @@ impl Turn<(Coordinate, Option<Square>), Board> for Sudoku {
         match square {
             Some(ref p) => {
                 self.board.fill_square(coord, p.clone())?;
-                return Ok(&self.board)
-            },
+                return Ok(&self.board);
+            }
             None => {
                 self.board.delete_square(&coord)?;
-                return Ok(&self.board)
-            },
+                return Ok(&self.board);
+            }
         }
     }
 }

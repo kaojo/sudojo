@@ -1,6 +1,7 @@
 use std::io;
 use std::process;
 use sudojo_core::app::{AppState, EAppState, EStartChoice, Start};
+use sudojo_core::app::difficulty::EDifficulty;
 use sudojo_sudoku_core::sudoku::Sudoku;
 use self::game_loop::GameLoop;
 
@@ -19,25 +20,28 @@ impl AppStarter {
             app_state: EAppState::Running,
         }
     }
-}
 
-impl Start for AppStarter {
-    fn start(&mut self, start_choice: &Option<EStartChoice>) {
-        match *start_choice {
-            Some(ref p) => {
-                info!("Start choice is given: {:?}", p);
-                self.app.start(start_choice);
-            }
-            None => {
-                let mut choice = get_start_choice();
-                info!("{:?}", choice);
-                while let EStartChoice::Invalid = choice {
-                    choice = get_start_choice();
-                }
-                self.app.start(&Some(choice));
-            }
-        }
+    pub fn start(&mut self) {
+        let choice: EStartChoice = AppStarter::get_start_choice();
+        self.app.start(choice);
         self.app.do_loop();
+    }
+
+    fn get_start_choice() -> EStartChoice {
+        let mut result = get_start_choice();
+        info!("{:?}", result);
+        while let EStartChoice::Invalid = result {
+            result = get_start_choice();
+        }
+        result
+    }
+
+    fn get_difficulty() -> EDifficulty {
+        let mut difficulty: Option<EDifficulty> = get_difficulty();
+        while difficulty.is_none() {
+            difficulty = get_difficulty();
+        }
+        difficulty.expect("Existence should have been checked before hand.")
     }
 }
 
@@ -64,7 +68,9 @@ fn get_start_choice() -> EStartChoice {
     match choice.trim() {
         "" | "1" => {
             info!("Starting new game!");
-            result = EStartChoice::NewGame
+            let difficulty: EDifficulty = AppStarter::get_difficulty();
+            info!("Chosen difficulty is {:?}", difficulty);
+            result = EStartChoice::NewGame(difficulty);
         }
         "2" => {
             info!("Continue last game");
@@ -81,4 +87,39 @@ fn get_start_choice() -> EStartChoice {
     }
 
     return result;
+}
+
+fn get_difficulty() -> Option<EDifficulty> {
+    info!("Choose a difficulty for the new game:");
+    info!("1) Easy");
+    info!("2) Medium");
+    info!("3) Hard");
+    info!("4) Very hard");
+
+    let mut choice = String::new();
+
+    io::stdin()
+        .read_line(&mut choice)
+        .expect("Could not read line.");
+
+    let result: Option<EDifficulty>;
+    match choice.trim() {
+        "1" => {
+            result = Some(EDifficulty::Easy)
+        }
+        "2" => {
+            result = Some(EDifficulty::Medium)
+        }
+        "3" => {
+            result = Some(EDifficulty::Hard)
+        }
+        "4" => {
+            result = Some(EDifficulty::VeryHard)
+        }
+        _ => {
+            result = None
+        }
+    }
+
+    result
 }

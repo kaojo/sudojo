@@ -17,6 +17,7 @@ pub struct CommandActionTypeParser {}
 
 impl CommandActionTypeParser {
     pub fn print_help(&self) {
+        info!("-------------------------------------------------------------------------------------------------------------------");
         info!("To perform an action first enter the type of action you want to perform");
         info!("t x,y,z - (x,y) are coordinates, z is the value for the square. 't' can be omitted since it is the default command.");
         info!("u - undo last turn");
@@ -26,6 +27,7 @@ impl CommandActionTypeParser {
         info!("s - solve sudoku for me");
         info!("q - quit the current game and go back to main menu");
         info!("h - print this help text");
+        info!("-------------------------------------------------------------------------------------------------------------------");
         info!("");
     }
 

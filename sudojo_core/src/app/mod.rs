@@ -1,7 +1,9 @@
+pub mod difficulty;
+use self::difficulty::EDifficulty;
 
 #[derive(Debug)]
 pub enum EStartChoice {
-    NewGame,
+    NewGame(EDifficulty),
     LoadGame,
     Quit,
     Invalid,
@@ -28,7 +30,7 @@ pub trait Tick {
 }
 
 pub trait Start {
-    fn start(&mut self, &Option<EStartChoice>);
+    fn start(&mut self, EStartChoice);
 }
 
 pub trait AppState {
