@@ -7,3 +7,4 @@ authors = ["kaojo <mail@kaojo.de>"]
 sudojo_core = {path = "../sudojo_core", version = "0.1.0"}
 ansi_term = "0.10.2"
 log = "0.3.7"
+rand = "0.3"

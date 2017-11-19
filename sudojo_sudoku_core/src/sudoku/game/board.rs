@@ -63,6 +63,10 @@ impl Board {
         Ok(self.get_state())
     }
 
+    pub fn delete_force(&mut self, coordinate: &Coordinate) {
+        self.data.remove(coordinate);
+    }
+
     pub fn undo_last(&mut self) {
         match self.turn_history.clone().len() {
             0 => (),
