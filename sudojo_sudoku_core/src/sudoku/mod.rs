@@ -5,7 +5,7 @@ use self::generator::{Generator, SimpleGenerator};
 pub mod game;
 pub mod ai;
 pub mod util;
-mod generator;
+pub mod generator;
 
 pub struct Sudoku {
     pub board: Board,

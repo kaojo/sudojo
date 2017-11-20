@@ -29,26 +29,9 @@ root:
     - log
 
 loggers:
-  sudojo:
+  sudojo_sudoku_core::sudoku::generator:
     level: debug
     appenders:
       - debug
     additive: true
 
-  sudojo_core:
-    level: debug
-    appenders:
-      - debug
-    additive: true
-
-  sudojo_sudoku_cmd:
-    level: debug
-    appenders:
-      - debug
-    additive: true
-
-  sudojo_sudoku_core:
-    level: debug
-    appenders:
-      - debug
-    additive: true

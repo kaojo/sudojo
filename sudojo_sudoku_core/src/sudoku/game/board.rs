@@ -131,7 +131,7 @@ impl Board {
         self.conflicts
     }
 
-    fn has_conflicts(&self) -> bool {
+    pub fn has_conflicts(&self) -> bool {
         let cloned_data = self.data.clone();
         for (coord, square) in cloned_data.iter() {
             match HorizontalUniqueRule::apply(&coord, &square, &self) {

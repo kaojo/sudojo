@@ -12,23 +12,30 @@ impl SolveController {
         result
     }
 
-    pub fn solve(&self, b: &Board) -> Board {
-        iterate_solve(b.clone())
+    pub fn solve(&self, b: &Board, intelligence: &ESolvingIntelligence) -> Board {
+        iterate_solve(b.clone(), intelligence)
     }
 }
 
-fn iterate_solve(b: Board) -> Board {
+#[derive(Debug, PartialEq)]
+pub enum ESolvingIntelligence {
+    SimpleLogic,
+    ComplexLogic,
+    WithGuessing
+}
+
+fn iterate_solve(b: Board, intelligence: &ESolvingIntelligence) -> Board {
     if b.get_state() != EGameState::Ok {
         return b;
     }
-    let board = do_solving_iteration(b.clone());
+    let board = do_solving_iteration(b.clone(), intelligence.clone());
     debug!("{:?}", board.get_state());
-    if board.get_state() == EGameState::Ok {
-        let v_board = VirtualBoard::new(&board);
+    if ESolvingIntelligence::WithGuessing == *intelligence && board.get_state() == EGameState::Ok {
+        let v_board = VirtualBoard::new(&board, intelligence);
         let (coordinate, field) = get_guess_data(v_board).expect("Should resolve");
         for value in field.get_possible_values().into_iter() {
             let mut tmp_board = board.clone();
-            debug!("Guessing value {} at coordinate {:?}",value, coordinate);
+            debug!("Guessing value {} at coordinate {:?}", value, coordinate);
             match tmp_board.fill_square(coordinate.clone(), Square::guess(*value)) {
                 Err(p) => error!("{}", p),
                 Ok(EGameState::Conflict) => {
@@ -38,17 +45,15 @@ fn iterate_solve(b: Board) -> Board {
                 Ok(EGameState::Finished) => return tmp_board,
                 Ok(EGameState::Ok) => {
                     debug!("Ok");
-                    let res = iterate_solve(tmp_board);
-                    {
-                        match res.get_state() {
-                            EGameState::Conflict => {
-                                debug!("Inner iterate result: {:?}", res.get_state());
-                                continue;
-                            }
-                            _ => {
-                                debug!("Inner iterate result: {:?}", res.get_state());
-                                return res
-                            },
+                    let res = iterate_solve(tmp_board, intelligence);
+                    match res.get_state() {
+                        EGameState::Conflict => {
+                            debug!("Inner iterate result: {:?}", res.get_state());
+                            continue;
+                        }
+                        _ => {
+                            debug!("Inner iterate result: {:?}", res.get_state());
+                            return res;
                         }
                     }
                 }
@@ -58,8 +63,8 @@ fn iterate_solve(b: Board) -> Board {
     board
 }
 
-fn do_solving_iteration(mut board: Board) -> Board {
-    let mut suggestion_controller: SuggestionController = SuggestionController::new(&board);
+fn do_solving_iteration(mut board: Board, intelligence: &ESolvingIntelligence) -> Board {
+    let mut suggestion_controller: SuggestionController = SuggestionController::new(&board, intelligence);
     let mut state: EGameState = board.get_state();
     while state == EGameState::Ok && !suggestion_controller.get_suggestions().is_empty() {
         for suggestion in suggestion_controller.get_suggestions() {
@@ -77,7 +82,7 @@ fn do_solving_iteration(mut board: Board) -> Board {
         }
         board.mark_conflicts();
         debug!("{}", board);
-        suggestion_controller = SuggestionController::new(&board);
+        suggestion_controller = SuggestionController::new(&board, intelligence);
     }
 
     board

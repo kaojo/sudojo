@@ -1,5 +1,6 @@
 use std::collections::{HashMap, HashSet};
 use super::super::game::{Coordinate, Board};
+use super::super::ai::ESolvingIntelligence;
 use super::super::game::rule::{HorizontalUniqueRule, VerticalUniqueRule, QuadrantUniqueRule, RowQuadrantCombinationRule};
 use super::Field;
 use super::super::util::iterators::{board_iterator, QuadrantSquaresIterator};
@@ -12,7 +13,7 @@ pub struct VirtualBoard {
 }
 
 impl VirtualBoard {
-    pub fn new(board: &Board) -> Self {
+    pub fn new(board: &Board, intelligence: &ESolvingIntelligence) -> Self {
         let mut v_board = VirtualBoard {
             data: HashMap::new(),
         };
@@ -59,8 +60,9 @@ impl VirtualBoard {
                 }
             }
         }
-
-        VirtualBoard::remove_row_quad_comb_rule(&mut v_board);
+        if intelligence == &ESolvingIntelligence::ComplexLogic {
+            VirtualBoard::remove_row_quad_comb_rule(&mut v_board);
+        }
         debug!("{}", v_board);
         v_board
     }

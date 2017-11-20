@@ -1,5 +1,5 @@
 use sudojo_core::app::{AppState, EAppState, Turn};
-use sudojo_sudoku_core::sudoku::ai::{SuggestionController, SolveController};
+use sudojo_sudoku_core::sudoku::ai::{SuggestionController, SolveController, ESolvingIntelligence};
 use sudojo_sudoku_core::sudoku::Sudoku;
 use sudojo_sudoku_core::sudoku::game::{Coordinate, Square};
 use std::io;
@@ -42,10 +42,10 @@ impl GameLoop for Sudoku {
                 EActionType::Revert => { self.board.revert() }
                 EActionType::Solve => {
                     let sc = SolveController::new();
-                    self.board = sc.solve(&self.board);
+                    self.board = sc.solve(&self.board, &ESolvingIntelligence::WithGuessing);
                 }
                 EActionType::Suggest => {
-                    let suggestion_controller: SuggestionController = SuggestionController::new(&self.board);
+                    let suggestion_controller: SuggestionController = SuggestionController::new(&self.board, &ESolvingIntelligence::ComplexLogic);
                     let possible_turns: HashSet<(Coordinate, Square)> = suggestion_controller.get_suggestions();
                     for suggestion in possible_turns.into_iter() {
                         let (coord, square) = suggestion;

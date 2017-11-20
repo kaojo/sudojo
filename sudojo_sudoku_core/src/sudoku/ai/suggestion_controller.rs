@@ -1,4 +1,5 @@
 use super::VirtualBoard;
+use super::ESolvingIntelligence;
 use super::super::game::{Board, Coordinate, Square};
 use super::super::util::iterators::{board_iterator, QuadrantSquaresIterator};
 use std::collections::HashSet;
@@ -8,9 +9,9 @@ pub struct SuggestionController {
 }
 
 impl SuggestionController {
-    pub fn new(board: &Board) -> Self {
+    pub fn new(board: &Board, intelligence: &ESolvingIntelligence) -> Self {
         SuggestionController {
-            virtual_board: VirtualBoard::new(board),
+            virtual_board: VirtualBoard::new(board, intelligence),
         }
     }
 
