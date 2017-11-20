@@ -1,9 +1,10 @@
 use sudojo_core::app::difficulty::EDifficulty;
 use super::game::{Board, Coordinate, Square, EGameState};
+use super::game::rule::{QuadrantUniqueRule, HorizontalUniqueRule, VerticalUniqueRule};
 use super::ai::{SolveController, ESolvingIntelligence};
 use rand::distributions::{Range, IndependentSample};
 use rand::{Rng, thread_rng};
-use std::collections::{HashSet};
+use std::collections::HashSet;
 use super::util::iterators::board_iterator;
 
 pub trait Generator {
@@ -123,16 +124,11 @@ fn generate_board_rng(max_number: u8) -> Result<Board, String> {
 }
 
 fn generate_completed_board_backtrace() -> Result<Board, String> {
-    do_fill_with_backtrace(Board::new())
+    do_fill_with_backtrace(Board::new(), Coordinate::new(1, 1))
 }
 
-fn do_fill_with_backtrace(mut board: Board) -> Result<Board, String> {
-    let coordinate = get_next_coordinate(&board);
-    if coordinate.is_none() {
-        return Ok(board);
-    }
-    let coord = coordinate.unwrap();
-    let set: HashSet<u8> = get_shuffled_values();
+fn do_fill_with_backtrace(mut board: Board, coord: Coordinate) -> Result<Board, String> {
+    let set: HashSet<u8> = get_shuffled_values(&board, &coord);
     for value in set {
         let state = board
             .fill_square(coord.clone(), Square::new(value, true))
@@ -142,7 +138,11 @@ fn do_fill_with_backtrace(mut board: Board) -> Result<Board, String> {
             EGameState::Finished => return Ok(board),
             EGameState::Conflict => board.delete_force(&coord),
             EGameState::Ok => {
-                let tmp_board = do_fill_with_backtrace(board.clone());
+                let c = get_next_coordinate(&coord);
+                if c.is_none() {
+                    return Ok(board);
+                }
+                let tmp_board = do_fill_with_backtrace(board.clone(), c.unwrap());
                 match tmp_board {
                     Err(_) => {
                         board.delete_force(&coord);
@@ -158,24 +158,34 @@ fn do_fill_with_backtrace(mut board: Board) -> Result<Board, String> {
     return Err(String::from("No suitable value found for field"));
 }
 
-fn get_shuffled_values() -> HashSet<u8> {
+fn get_shuffled_values(board: &Board, coordinate: &Coordinate) -> HashSet<u8> {
     let mut set: HashSet<u8> = HashSet::new();
     let mut possible_values = [1, 2, 3, 4, 5, 6, 7, 8, 9];
-    thread_rng().shuffle(&mut possible_values);
+    let mut rng = thread_rng();
+    rng.shuffle(&mut possible_values);
     for value in possible_values.iter() {
         set.insert(*value);
+    }
+    for value in HorizontalUniqueRule::get_forbidden_values(board, coordinate) {
+        set.remove(&value);
+    }
+    for value in VerticalUniqueRule::get_forbidden_values(board, coordinate) {
+        set.remove(&value);
+    }
+    for value in QuadrantUniqueRule::get_forbidden_values(board, coordinate) {
+        set.remove(&value);
     }
     set
 }
 
-fn get_next_coordinate(board: &Board) -> Option<Coordinate> {
-    for (x, y) in board_iterator() {
-        let coord = Coordinate::new(x, y);
-        match board.get_square(&coord) {
-            Some(_) => continue,
-            None => (),
-        }
-        return Some(coord);
+fn get_next_coordinate(coord: &Coordinate) -> Option<Coordinate> {
+    let x = coord.x;
+    let y = coord.y;
+
+    if x < 9 {
+        return Some(Coordinate::new(x + 1, y));
+    } else if y < 9 {
+        return Some(Coordinate::new(1, y + 1));
     }
     None
 }

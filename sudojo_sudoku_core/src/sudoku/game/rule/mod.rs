@@ -1,5 +1,5 @@
 use super::{Coordinate, Square, Board, EGameState};
-use super::super::util::iterators::quadrant_iterator;
+use super::super::util::iterators::{quadrant_iterator, quadrant_squares_iterator};
 use super::super::ai::VirtualBoard;
 use std::collections::{HashMap, HashSet};
 
@@ -34,6 +34,16 @@ impl HorizontalUniqueRule {
         }
         result
     }
+
+    pub fn get_forbidden_values(board: &Board, coordinate: &Coordinate) -> HashSet<u8> {
+        let mut row_result: HashSet<u8> = HashSet::new();
+        for x in 1..10 {
+            if let Some(ref p) = board.get_square(&Coordinate::new(x, coordinate.y)) {
+                row_result.insert(p.value);
+            }
+        }
+        row_result
+    }
 }
 
 pub struct VerticalUniqueRule {}
@@ -66,6 +76,16 @@ impl VerticalUniqueRule {
             result.insert(x, column_result);
         }
         result
+    }
+
+    pub fn get_forbidden_values(board: &Board, coordinate: &Coordinate) -> HashSet<u8> {
+        let mut column_result: HashSet<u8> = HashSet::new();
+        for y in 1..10 {
+            if let Some(ref p) = board.get_square(&Coordinate::new(coordinate.x, y)) {
+                column_result.insert(p.value);
+            }
+        }
+        column_result
     }
 }
 
@@ -105,6 +125,16 @@ impl QuadrantUniqueRule {
             result.insert(Coordinate::new(q_x, q_y), quadrant_result);
         }
         result
+    }
+
+    pub fn get_forbidden_values(board: &Board, coordinate: &Coordinate) -> HashSet<u8> {
+        let mut quadrant_result: HashSet<u8> = HashSet::new();
+        for (x,y) in quadrant_squares_iterator(coordinate.x, coordinate.y) {
+            if let Some(ref p) = board.get_square(&Coordinate::new(coordinate.x, y)) {
+                quadrant_result.insert(p.value);
+            }
+        }
+        quadrant_result
     }
 }
 
