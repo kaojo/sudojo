@@ -6,11 +6,14 @@ pub struct Coordinate {
 
 impl Coordinate {
     pub fn new(x: u8, y: u8) -> Self {
+        if x > 9 || y > 9 {
+            panic!("This is not allowed.")
+        }
         Coordinate { x: x, y: y }
     }
 
     pub fn get_index(&self) -> usize {
-        return (9 * (self.y-1) + self.x -1) as usize;
+        return (9 * (self.y - 1) + self.x - 1) as usize;
     }
 
     pub fn from_index(index: usize) -> Self {
@@ -30,10 +33,10 @@ mod tests {
 
     #[test]
     fn test_get_index() {
-        assert_eq!(0, Coordinate::new(1,1,).get_index());
-        assert_eq!(8, Coordinate::new(9,1,).get_index());
-        assert_eq!(9, Coordinate::new(1,2,).get_index());
-        assert_eq!(80, Coordinate::new(9,9,).get_index());
+        assert_eq!(0, Coordinate::new(1, 1).get_index());
+        assert_eq!(8, Coordinate::new(9, 1).get_index());
+        assert_eq!(9, Coordinate::new(1, 2).get_index());
+        assert_eq!(80, Coordinate::new(9, 9).get_index());
     }
 
     #[test]

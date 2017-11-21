@@ -1,5 +1,5 @@
 use super::{Coordinate, Board, EGameState};
-use super::super::util::iterators::{quadrant_iterator, quadrant_squares_iterator};
+use super::super::util::iterators::{quadrant_iterator, QuadrantSquaresIterator};
 use super::super::ai::VirtualBoard;
 use std::collections::{HashMap, HashSet};
 
@@ -106,8 +106,8 @@ impl QuadrantUniqueRule {
             &None => return EGameState::Ok,
             &Some(p) => value = p.value,
         }
-        let x_quadrant = (coordinate.x as f32 / 3 as f32).ceil() as u8;
-        let y_quadrant = (coordinate.y as f32 / 3 as f32).ceil() as u8;
+        let x_quadrant = calculate_quadrant(coordinate.x);
+        let y_quadrant = calculate_quadrant(coordinate.y);
         for y in (y_quadrant * 3 - 2)..(y_quadrant * 3 + 1) {
             for x in (x_quadrant * 3 - 2)..(x_quadrant * 3 + 1) {
                 if y != coordinate.y && x != coordinate.x {
@@ -141,7 +141,7 @@ impl QuadrantUniqueRule {
 
     pub fn get_forbidden_values(board: &Board, coordinate: &Coordinate) -> HashSet<u8> {
         let mut quadrant_result: HashSet<u8> = HashSet::new();
-        for (_, y) in quadrant_squares_iterator(coordinate.x, coordinate.y) {
+        for (_, y) in QuadrantSquaresIterator::from_board_coordinates(coordinate.x, coordinate.y) {
             if let &Some(ref p) = board.get_square(&Coordinate::new(coordinate.x, y)) {
                 quadrant_result.insert(p.value);
             }
@@ -155,7 +155,7 @@ pub struct RowQuadrantCombinationRule {}
 impl RowQuadrantCombinationRule {
     pub fn is_exclusive_in_quadrant_horizontally(v_board: &VirtualBoard, coordinate: &Coordinate, value: &u8) -> bool {
         for x in 1..10 {
-            let x_quadrant = (coordinate.x as f32 / 3 as f32).ceil() as u8;
+            let x_quadrant = calculate_quadrant(coordinate.x);
             //not in same quadrant
             if !(((x_quadrant - 1) * 3 + 1) <= x && x <= (x_quadrant * 3)) {
                 if let Some(p) = v_board.get_field(&Coordinate::new(x, coordinate.y)) {
@@ -169,7 +169,7 @@ impl RowQuadrantCombinationRule {
     }
     pub fn is_exclusive_in_quadrant_vertically(v_board: &VirtualBoard, coordinate: &Coordinate, value: &u8) -> bool {
         for y in 1..10 {
-            let y_quadrant = (coordinate.y as f32 / 3 as f32).ceil() as u8;
+            let y_quadrant = calculate_quadrant(coordinate.y);
             //not in same quadrant
             if !(((y_quadrant - 1) * 3 + 1) <= y && y <= (y_quadrant * 3)) {
                 if let Some(p) = v_board.get_field(&Coordinate::new(coordinate.x, y)) {
@@ -183,11 +183,28 @@ impl RowQuadrantCombinationRule {
     }
 }
 
+fn calculate_quadrant(x: u8) -> u8 {
+    return (x as f32 / 3 as f32).ceil() as u8
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
     use super::super::super::ai::Field;
     use super::super::super::util::iterators::board_iterator;
+
+    #[test]
+    fn test_calculate_quadrant() {
+        assert_eq!(1, calculate_quadrant(1));
+        assert_eq!(1, calculate_quadrant(2));
+        assert_eq!(1, calculate_quadrant(3));
+        assert_eq!(2, calculate_quadrant(4));
+        assert_eq!(2, calculate_quadrant(5));
+        assert_eq!(2, calculate_quadrant(6));
+        assert_eq!(3, calculate_quadrant(7));
+        assert_eq!(3, calculate_quadrant(8));
+        assert_eq!(3, calculate_quadrant(9));
+    }
 
     #[test]
     fn is_exclusive_in_quadrant_horizontally() {

@@ -96,7 +96,13 @@ impl Board {
     }
 
     pub fn get_square(&self, coord: &Coordinate) -> &Option<Square> {
-        self.data.get(coord.get_index()).expect("Should be there")
+        match self.data.get(coord.get_index()) {
+            Some(p) => return p,
+            None => {
+                debug!("{:?}", coord);
+                return &None;
+            },
+        }
     }
 
     pub fn initialized(&mut self, init: bool) {
@@ -110,24 +116,24 @@ impl Board {
     pub fn mark_conflicts(&mut self) -> bool {
         self.reset_conflicts();
         let cloned_data = self.data.clone();
-        let mut conflicts: HashSet<Coordinate> = HashSet::new();
+        let mut conflicts: Vec<Coordinate> = Vec::new();
         for (index, _) in cloned_data.iter().enumerate() {
             let coord: Coordinate = Coordinate::from_index(index);
             match HorizontalUniqueRule::apply(&coord, &self) {
                 EGameState::Conflict => {
-                    conflicts.insert(coord);
+                    conflicts.push(coord);
                 }
                 _ => (),
             }
             match VerticalUniqueRule::apply(&coord, &self) {
                 EGameState::Conflict => {
-                    conflicts.insert(coord);
+                    conflicts.push(coord);
                 }
                 _ => (),
             }
             match QuadrantUniqueRule::apply(&coord, &self) {
                 EGameState::Conflict => {
-                    conflicts.insert(coord);
+                    conflicts.push(coord);
                 }
                 _ => (),
             }
