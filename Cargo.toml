@@ -5,6 +5,7 @@ authors = ["julian.winter <julian.wnter@k-tc.de>"]
 
 [dependencies]
 sudojo_core = {path = "sudojo_core", version = "0.1.0"}
+sudojo_sudoku_core = {path = "sudojo_sudoku_core", version = "0.1.0"}
 sudojo_sudoku_cmd = {path = "sudojo_sudoku_cmd", version = "0.1.0"}
 log = "0.3.7"
 log4rs = "0.7.0"

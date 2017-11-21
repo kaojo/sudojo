@@ -20,7 +20,7 @@ impl VirtualBoard {
 
         // insert already known data
         for (coordinate, square) in board.get_data() {
-            v_board.data.insert(coordinate.clone(), Field::from_square(square));
+            v_board.data.insert(*coordinate, Field::from_square(square));
         }
 
         // initialize unknown fields in virtual board

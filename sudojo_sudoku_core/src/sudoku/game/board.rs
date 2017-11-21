@@ -10,7 +10,6 @@ pub struct Board {
     data: HashMap<Coordinate, Square>,
     turn_history: Vec<Coordinate>,
     initialized: bool,
-    conflicts: bool,
 }
 
 impl Board {
@@ -19,12 +18,11 @@ impl Board {
             data: HashMap::new(),
             turn_history: Vec::new(),
             initialized: false,
-            conflicts: false,
         }
     }
 
-    pub fn fill_square(&mut self, coord: Coordinate, square: Square) -> Result<EGameState, String> {
-        debug!("{:?}, {:?}", coord, square);
+    pub fn fill_square(&mut self, coordinate: Coordinate, square: Square) -> Result<EGameState, String> {
+        debug!("{:?}, {:?}", coordinate, square);
         if self.initialized && square.initial {
             return Err(String::from(
                 "Initializing squares in the board is only allowed during init phase.",
@@ -34,17 +32,17 @@ impl Board {
                 "Can't put non initial values in the board during init phase.",
             ));
         } else {
-            if self.data.contains_key(&coord) {
+            if self.data.contains_key(&coordinate) {
                 return Err(String::from(
                     "A Field with these coordinates allready exists!",
                 ));
             } else {
                 if self.initialized {
-                    self.turn_history.push(coord.clone());
+                    self.turn_history.push(coordinate);
                 }
-                self.data.insert(coord, square);
+                self.data.insert(coordinate, square);
             }
-            return Ok(self.get_state());
+            return Ok(Board::evaluate_after_add(self, &coordinate));
         }
     }
 
@@ -103,20 +101,20 @@ impl Board {
         self.reset_conflicts();
         let cloned_data = self.data.clone();
         let mut conflicts: HashSet<&Coordinate> = HashSet::new();
-        for (coord, square) in cloned_data.iter() {
-            match HorizontalUniqueRule::apply(&coord, &square, &self) {
+        for (coord, _) in cloned_data.iter() {
+            match HorizontalUniqueRule::apply(&coord, &self) {
                 EGameState::Conflict => {
                     conflicts.insert(coord);
                 }
                 _ => (),
             }
-            match VerticalUniqueRule::apply(&coord, &square, &self) {
+            match VerticalUniqueRule::apply(&coord, &self) {
                 EGameState::Conflict => {
                     conflicts.insert(coord);
                 }
                 _ => (),
             }
-            match QuadrantUniqueRule::apply(&coord, &square, &self) {
+            match QuadrantUniqueRule::apply(&coord, &self) {
                 EGameState::Conflict => {
                     conflicts.insert(coord);
                 }
@@ -127,26 +125,24 @@ impl Board {
             let square = self.data.get_mut(coord).expect("Should be in list.");
             square.conflict = true;
         }
-        self.conflicts = !conflicts.is_empty();
-        self.conflicts
+        !conflicts.is_empty()
     }
 
     pub fn has_conflicts(&self) -> bool {
-        let cloned_data = self.data.clone();
-        for (coord, square) in cloned_data.iter() {
-            match HorizontalUniqueRule::apply(&coord, &square, &self) {
+        for (coord, _) in self.data.iter() {
+            match HorizontalUniqueRule::apply(&coord, &self) {
                 EGameState::Conflict => {
                     return true;
                 }
                 _ => (),
             }
-            match VerticalUniqueRule::apply(&coord, &square, &self) {
+            match VerticalUniqueRule::apply(&coord, &self) {
                 EGameState::Conflict => {
                     return true;
                 }
                 _ => (),
             }
-            match QuadrantUniqueRule::apply(&coord, &square, &self) {
+            match QuadrantUniqueRule::apply(&coord, &self) {
                 EGameState::Conflict => {
                     return true;
                 }
@@ -175,6 +171,22 @@ impl Board {
         for square in self.data.values_mut() {
             square.conflict = false;
         }
+    }
+
+    fn evaluate_after_add(board: &Board, coordinate: &Coordinate) -> EGameState {
+        if EGameState::Conflict == HorizontalUniqueRule::apply(coordinate, board) {
+            return EGameState::Conflict;
+        }
+        if EGameState::Conflict == VerticalUniqueRule::apply(coordinate, board) {
+            return EGameState::Conflict;
+        }
+        if EGameState::Conflict == QuadrantUniqueRule::apply(coordinate, board) {
+            return EGameState::Conflict;
+        }
+        if board.is_filled() {
+            return EGameState::Finished;
+        }
+        EGameState::Ok
     }
 }
 

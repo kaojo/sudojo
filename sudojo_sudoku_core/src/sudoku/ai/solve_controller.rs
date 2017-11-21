@@ -36,7 +36,7 @@ fn iterate_solve(b: Board, intelligence: &ESolvingIntelligence) -> Board {
         for value in field.get_possible_values().into_iter() {
             let mut tmp_board = board.clone();
             debug!("Guessing value {} at coordinate {:?}", value, coordinate);
-            match tmp_board.fill_square(coordinate.clone(), Square::guess(*value)) {
+            match tmp_board.fill_square(coordinate, Square::guess(*value)) {
                 Err(p) => error!("{}", p),
                 Ok(EGameState::Conflict) => {
                     debug!("Conflict");

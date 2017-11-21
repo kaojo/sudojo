@@ -1,4 +1,4 @@
-use super::{Coordinate, Square, Board, EGameState};
+use super::{Coordinate, Board, EGameState};
 use super::super::util::iterators::{quadrant_iterator, quadrant_squares_iterator};
 use super::super::ai::VirtualBoard;
 use std::collections::{HashMap, HashSet};
@@ -6,11 +6,15 @@ use std::collections::{HashMap, HashSet};
 pub struct HorizontalUniqueRule {}
 
 impl HorizontalUniqueRule {
-    pub fn apply(coord: &Coordinate, square: &Square, board: &Board) -> EGameState {
-        let value = square.value;
+    pub fn apply(coordinate: &Coordinate, board: &Board) -> EGameState {
+        let value: u8;
+        match board.get_square(coordinate) {
+            None => return EGameState::Ok,
+            Some(p) => value = p.value,
+        }
         for x in 1..10 {
-            if x != coord.x {
-                let compare_square = board.get_square(&Coordinate::new(x, coord.y));
+            if x != coordinate.x {
+                let compare_square = board.get_square(&Coordinate::new(x, coordinate.y));
                 if compare_square.is_some() {
                     if value == compare_square.unwrap().value {
                         return EGameState::Conflict;
@@ -49,11 +53,15 @@ impl HorizontalUniqueRule {
 pub struct VerticalUniqueRule {}
 
 impl VerticalUniqueRule {
-    pub fn apply(coord: &Coordinate, square: &Square, board: &Board) -> EGameState {
-        let value = square.value;
+    pub fn apply(coordinate: &Coordinate, board: &Board) -> EGameState {
+        let value: u8;
+        match board.get_square(coordinate) {
+            None => return EGameState::Ok,
+            Some(p) => value = p.value,
+        }
         for y in 1..10 {
-            if y != coord.y {
-                let compare_square = board.get_square(&Coordinate::new(coord.x, y));
+            if y != coordinate.y {
+                let compare_square = board.get_square(&Coordinate::new(coordinate.x, y));
                 if compare_square.is_some() {
                     if value == compare_square.unwrap().value {
                         return EGameState::Conflict;
@@ -92,13 +100,17 @@ impl VerticalUniqueRule {
 pub struct QuadrantUniqueRule {}
 
 impl QuadrantUniqueRule {
-    pub fn apply(coord: &Coordinate, square: &Square, board: &Board) -> EGameState {
-        let value = square.value;
-        let x_quadrant = (coord.x as f32 / 3 as f32).ceil() as u8;
-        let y_quadrant = (coord.y as f32 / 3 as f32).ceil() as u8;
+    pub fn apply(coordinate: &Coordinate, board: &Board) -> EGameState {
+        let value: u8;
+        match board.get_square(coordinate) {
+            None => return EGameState::Ok,
+            Some(p) => value = p.value,
+        }
+        let x_quadrant = (coordinate.x as f32 / 3 as f32).ceil() as u8;
+        let y_quadrant = (coordinate.y as f32 / 3 as f32).ceil() as u8;
         for y in (y_quadrant * 3 - 2)..(y_quadrant * 3 + 1) {
             for x in (x_quadrant * 3 - 2)..(x_quadrant * 3 + 1) {
-                if y != coord.y && x != coord.x {
+                if y != coordinate.y && x != coordinate.x {
                     let compare_square = board.get_square(&Coordinate::new(x, y));
                     if compare_square.is_some() {
                         if value == compare_square.unwrap().value {
@@ -129,7 +141,7 @@ impl QuadrantUniqueRule {
 
     pub fn get_forbidden_values(board: &Board, coordinate: &Coordinate) -> HashSet<u8> {
         let mut quadrant_result: HashSet<u8> = HashSet::new();
-        for (x,y) in quadrant_squares_iterator(coordinate.x, coordinate.y) {
+        for (_, y) in quadrant_squares_iterator(coordinate.x, coordinate.y) {
             if let Some(ref p) = board.get_square(&Coordinate::new(coordinate.x, y)) {
                 quadrant_result.insert(p.value);
             }
@@ -141,12 +153,12 @@ impl QuadrantUniqueRule {
 pub struct RowQuadrantCombinationRule {}
 
 impl RowQuadrantCombinationRule {
-    pub fn is_exclusive_in_quadrant_horizontally(v_board: &VirtualBoard, coord: &Coordinate, value: &u8) -> bool {
+    pub fn is_exclusive_in_quadrant_horizontally(v_board: &VirtualBoard, coordinate: &Coordinate, value: &u8) -> bool {
         for x in 1..10 {
-            let x_quadrant = (coord.x as f32 / 3 as f32).ceil() as u8;
+            let x_quadrant = (coordinate.x as f32 / 3 as f32).ceil() as u8;
             //not in same quadrant
             if !(((x_quadrant - 1) * 3 + 1) <= x && x <= (x_quadrant * 3)) {
-                if let Some(p) = v_board.get_field(&Coordinate::new(x, coord.y)) {
+                if let Some(p) = v_board.get_field(&Coordinate::new(x, coordinate.y)) {
                     if p.get_possible_values().contains(value) {
                         return false;
                     }
@@ -155,12 +167,12 @@ impl RowQuadrantCombinationRule {
         }
         true
     }
-    pub fn is_exclusive_in_quadrant_vertically(v_board: &VirtualBoard, coord: &Coordinate, value: &u8) -> bool {
+    pub fn is_exclusive_in_quadrant_vertically(v_board: &VirtualBoard, coordinate: &Coordinate, value: &u8) -> bool {
         for y in 1..10 {
-            let y_quadrant = (coord.y as f32 / 3 as f32).ceil() as u8;
+            let y_quadrant = (coordinate.y as f32 / 3 as f32).ceil() as u8;
             //not in same quadrant
             if !(((y_quadrant - 1) * 3 + 1) <= y && y <= (y_quadrant * 3)) {
-                if let Some(p) = v_board.get_field(&Coordinate::new(coord.x, y)) {
+                if let Some(p) = v_board.get_field(&Coordinate::new(coordinate.x, y)) {
                     if p.get_possible_values().contains(value) {
                         return false;
                     }
@@ -193,14 +205,14 @@ mod tests {
         // is not unique in quadrant
 
         let board = VirtualBoard::from(map);
-        let coord_1_1 = Coordinate::new(1, 1);
-        assert!(RowQuadrantCombinationRule::is_exclusive_in_quadrant_horizontally(&board, &coord_1_1, &1));
-        let coord_1_2 = Coordinate::new(1, 2);
-        assert!(!RowQuadrantCombinationRule::is_exclusive_in_quadrant_horizontally(&board, &coord_1_2, &1));
-        let coord_4_1 = Coordinate::new(4, 1);
-        assert!(!RowQuadrantCombinationRule::is_exclusive_in_quadrant_horizontally(&board, &coord_4_1, &1));
-        let coord_4_2 = Coordinate::new(4, 2);
-        assert!(!RowQuadrantCombinationRule::is_exclusive_in_quadrant_horizontally(&board, &coord_4_2, &1));
+        let coordinate_1_1 = Coordinate::new(1, 1);
+        assert!(RowQuadrantCombinationRule::is_exclusive_in_quadrant_horizontally(&board, &coordinate_1_1, &1));
+        let coordinate_1_2 = Coordinate::new(1, 2);
+        assert!(!RowQuadrantCombinationRule::is_exclusive_in_quadrant_horizontally(&board, &coordinate_1_2, &1));
+        let coordinate_4_1 = Coordinate::new(4, 1);
+        assert!(!RowQuadrantCombinationRule::is_exclusive_in_quadrant_horizontally(&board, &coordinate_4_1, &1));
+        let coordinate_4_2 = Coordinate::new(4, 2);
+        assert!(!RowQuadrantCombinationRule::is_exclusive_in_quadrant_horizontally(&board, &coordinate_4_2, &1));
     }
 
     #[test]

@@ -1,5 +1,5 @@
 
-#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash, Copy)]
 pub struct Square {
     pub value: u8,
     pub initial: bool,
@@ -20,7 +20,7 @@ impl Square {
     }
     pub fn generate(value: u8) -> Self {
         Square {
-            value: value,
+            value,
             initial: false,
             conflict: false,
             generated: true,

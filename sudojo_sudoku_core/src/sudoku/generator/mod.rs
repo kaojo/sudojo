@@ -5,7 +5,8 @@ use super::ai::{SolveController, ESolvingIntelligence};
 use rand::distributions::{Range, IndependentSample};
 use rand::{Rng, thread_rng};
 use std::collections::HashSet;
-use super::util::iterators::board_iterator;
+
+pub mod standalone;
 
 pub trait Generator {
     fn generate(difficulty: EDifficulty) -> Board;
@@ -30,7 +31,7 @@ impl Generator for SimpleGenerator {
 pub struct BackTraceGenerator {}
 
 impl Generator for BackTraceGenerator {
-    fn generate(difficulty: EDifficulty) -> Board {
+    fn generate(_: EDifficulty) -> Board {
         generate_completed_board_backtrace().unwrap()
     }
 }
@@ -98,7 +99,7 @@ fn generate_board_rng(max_number: u8) -> Result<Board, String> {
         let mut value_found: bool = false;
         let mut tmp = result.clone();
         for value in possible_values.iter() {
-            let state = tmp.fill_square(coordinate.clone(), Square::new(*value, true))
+            let state = tmp.fill_square(coordinate, Square::new(*value, true))
                 .expect("should always be possible to add a value.");
             match state {
                 EGameState::Conflict => {
@@ -124,14 +125,16 @@ fn generate_board_rng(max_number: u8) -> Result<Board, String> {
 }
 
 fn generate_completed_board_backtrace() -> Result<Board, String> {
-    do_fill_with_backtrace(Board::new(), Coordinate::new(1, 1))
+    let mut board = Board::new();
+    do_fill_with_backtrace(&mut board, Coordinate::new(1, 1))?;
+    return Ok(board);
 }
 
-fn do_fill_with_backtrace(mut board: Board, coord: Coordinate) -> Result<Board, String> {
+fn do_fill_with_backtrace(board: &mut Board, coord: Coordinate) -> Result<&mut Board, String> {
     let set: HashSet<u8> = get_shuffled_values(&board, &coord);
     for value in set {
         let state = board
-            .fill_square(coord.clone(), Square::new(value, true))
+            .fill_square(coord, Square::new(value, true))
             .expect("Should allways return ok.");
 
         match state {
@@ -142,16 +145,18 @@ fn do_fill_with_backtrace(mut board: Board, coord: Coordinate) -> Result<Board, 
                 if c.is_none() {
                     return Ok(board);
                 }
-                let tmp_board = do_fill_with_backtrace(board.clone(), c.unwrap());
-                match tmp_board {
+                let mut error = false;
+                match do_fill_with_backtrace(board, c.unwrap()) {
                     Err(_) => {
-                        board.delete_force(&coord);
-                        continue;
+                        error = true;
                     }
-                    Ok(p) => {
-                        return Ok(p);
-                    }
+                    Ok(p) => {}
                 }
+                if error {
+                    board.delete_force(&coord);
+                    continue;
+                }
+                return Ok(board);
             }
         }
     }

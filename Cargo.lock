@@ -313,6 +313,7 @@ dependencies = [
  "log4rs 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "sudojo_core 0.1.0",
  "sudojo_sudoku_cmd 0.1.0",
+ "sudojo_sudoku_core 0.1.0",
 ]
 
 [[package]]
