@@ -11,8 +11,8 @@ pub struct Square {
 impl Square {
     pub fn new(value: u8, initial: bool) -> Self {
         Square {
-            value: value,
-            initial: initial,
+            value,
+            initial,
             conflict: false,
             generated: false,
             guessed: false,
@@ -29,7 +29,7 @@ impl Square {
     }
     pub fn guess(value: u8) -> Self {
         Square {
-            value: value,
+            value,
             initial: false,
             conflict: false,
             generated: true,

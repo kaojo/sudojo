@@ -19,8 +19,9 @@ impl VirtualBoard {
         };
 
         // insert already known data
-        for (coordinate, square) in board.get_data() {
-            v_board.data.insert(*coordinate, Field::from_square(square));
+        for (index, square) in board.get_data().iter().enumerate() {
+            let coordinate = Coordinate::from_index(index);
+            v_board.data.insert(coordinate, Field::from_square(square));
         }
 
         // initialize unknown fields in virtual board

@@ -205,7 +205,6 @@ mod tests {
         assert!(result.is_ok());
         let board = result.unwrap();
         assert!(!board.has_conflicts());
-        assert_eq!(board.get_data().len(), 10);
         println!("{}", board)
     }
 
@@ -215,7 +214,6 @@ mod tests {
         assert!(result.is_ok());
         let board = result.unwrap();
         assert!(!board.has_conflicts());
-        assert_eq!(board.get_data().len(), 81);
         println!("{}", board)
     }
 }

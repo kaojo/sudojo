@@ -7,7 +7,7 @@ use std::collections::HashSet;
 
 #[derive(Clone, Debug)]
 pub struct Board {
-    data: HashMap<Coordinate, Square>,
+    data: Vec<Square>,
     turn_history: Vec<Coordinate>,
     initialized: bool,
 }
@@ -15,7 +15,7 @@ pub struct Board {
 impl Board {
     pub fn new() -> Self {
         Board {
-            data: HashMap::new(),
+            data: Vec::new(),
             turn_history: Vec::new(),
             initialized: false,
         }
@@ -32,15 +32,16 @@ impl Board {
                 "Can't put non initial values in the board during init phase.",
             ));
         } else {
-            if self.data.contains_key(&coordinate) {
-                return Err(String::from(
+            match self.data.get(coordinate.get_index()) {
+                Some(_) => return Err(String::from(
                     "A Field with these coordinates allready exists!",
-                ));
-            } else {
-                if self.initialized {
-                    self.turn_history.push(coordinate);
+                )),
+                None => {
+                    if self.initialized {
+                        self.turn_history.push(coordinate);
+                    }
+                    self.data.insert(coordinate.get_index(), square);
                 }
-                self.data.insert(coordinate, square);
             }
             return Ok(Board::evaluate_after_add(self, &coordinate));
         }
@@ -48,7 +49,7 @@ impl Board {
 
     pub fn delete_square(&mut self, coord: &Coordinate) -> Result<EGameState, String> {
         let mut error: bool = false;
-        match self.data.get(coord) {
+        match self.data.get(coord.get_index()) {
             Some(ref p) => if p.initial {
                 error = true;
             },
@@ -57,12 +58,12 @@ impl Board {
         if error {
             return Err(String::from("Deleting an initial square is not allowed."));
         }
-        self.data.remove(&coord);
+        self.data.remove(coord.get_index());
         Ok(self.get_state())
     }
 
     pub fn delete_force(&mut self, coordinate: &Coordinate) {
-        self.data.remove(coordinate);
+        self.data.remove(coordinate.get_index());
     }
 
     pub fn undo_last(&mut self) {
@@ -77,31 +78,27 @@ impl Board {
     }
 
     pub fn revert(&mut self) {
-        let cloned_data = self.data.clone();
-        for (coord, square) in cloned_data.iter() {
-            if !square.initial {
-                self.delete_square(&coord).expect("should allways work");
-            }
-        }
+        self.data.retain(|&s| s.initial);
     }
 
     pub fn get_square(&self, coord: &Coordinate) -> Option<&Square> {
-        self.data.get(coord)
+        self.data.get(coord.get_index())
     }
 
     pub fn initialized(&mut self, init: bool) {
         self.initialized = init;
     }
 
-    pub fn get_data(&self) -> &HashMap<Coordinate, Square> {
+    pub fn get_data(&self) -> &Vec<Square> {
         &self.data
     }
 
     pub fn mark_conflicts(&mut self) -> bool {
         self.reset_conflicts();
         let cloned_data = self.data.clone();
-        let mut conflicts: HashSet<&Coordinate> = HashSet::new();
-        for (coord, _) in cloned_data.iter() {
+        let mut conflicts: HashSet<Coordinate> = HashSet::new();
+        for (index, _) in cloned_data.iter().enumerate() {
+            let coord: Coordinate = Coordinate::from_index(index);
             match HorizontalUniqueRule::apply(&coord, &self) {
                 EGameState::Conflict => {
                     conflicts.insert(coord);
@@ -122,14 +119,15 @@ impl Board {
             }
         }
         for coord in conflicts.iter() {
-            let square = self.data.get_mut(coord).expect("Should be in list.");
+            let square = self.data.get_mut(coord.get_index()).expect("Should be in list.");
             square.conflict = true;
         }
         !conflicts.is_empty()
     }
 
     pub fn has_conflicts(&self) -> bool {
-        for (coord, _) in self.data.iter() {
+        for (index, _) in self.data.iter().enumerate() {
+            let coord = Coordinate::from_index(index);
             match HorizontalUniqueRule::apply(&coord, &self) {
                 EGameState::Conflict => {
                     return true;
@@ -168,7 +166,7 @@ impl Board {
     }
 
     fn reset_conflicts(&mut self) {
-        for square in self.data.values_mut() {
+        for square in self.data.iter_mut() {
             square.conflict = false;
         }
     }
