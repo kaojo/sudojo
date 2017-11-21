@@ -7,15 +7,19 @@ use std::collections::HashSet;
 
 #[derive(Clone, Debug)]
 pub struct Board {
-    data: Vec<Square>,
+    data: Vec<Option<Square>>,
     turn_history: Vec<Coordinate>,
     initialized: bool,
 }
 
 impl Board {
     pub fn new() -> Self {
+        let mut vec = Vec::new();
+        for index in 0..81 {
+            vec.push(None);
+        }
         Board {
-            data: Vec::new(),
+            data: vec,
             turn_history: Vec::new(),
             initialized: false,
         }
@@ -32,16 +36,24 @@ impl Board {
                 "Can't put non initial values in the board during init phase.",
             ));
         } else {
-            match self.data.get(coordinate.get_index()) {
-                Some(_) => return Err(String::from(
-                    "A Field with these coordinates allready exists!",
-                )),
-                None => {
-                    if self.initialized {
-                        self.turn_history.push(coordinate);
+            let mut not_allowed = true;
+            {
+                let s = self.data.get(coordinate.get_index()).expect("Should be initialized");
+                match s {
+                    &Some(_) => return Err(String::from(
+                        "A Field with these coordinates allready exists!",
+                    )),
+                    &None => {
+                        not_allowed = false;
+                        if self.initialized {
+                            self.turn_history.push(coordinate);
+                        }
                     }
-                    self.data.insert(coordinate.get_index(), square);
                 }
+            }
+            if !not_allowed {
+                self.data.remove(coordinate.get_index());
+                self.data.insert(coordinate.get_index(), Some(square));
             }
             return Ok(Board::evaluate_after_add(self, &coordinate));
         }
@@ -49,21 +61,23 @@ impl Board {
 
     pub fn delete_square(&mut self, coord: &Coordinate) -> Result<EGameState, String> {
         let mut error: bool = false;
-        match self.data.get(coord.get_index()) {
-            Some(ref p) => if p.initial {
+        match self.data.get(coord.get_index()).expect("should be there") {
+            &Some(ref p) => if p.initial {
                 error = true;
             },
-            None => (),
+            &None => (),
         }
         if error {
             return Err(String::from("Deleting an initial square is not allowed."));
         }
         self.data.remove(coord.get_index());
+        self.data.insert(coord.get_index(), None);
         Ok(self.get_state())
     }
 
     pub fn delete_force(&mut self, coordinate: &Coordinate) {
         self.data.remove(coordinate.get_index());
+        self.data.insert(coordinate.get_index(), None);
     }
 
     pub fn undo_last(&mut self) {
@@ -78,18 +92,18 @@ impl Board {
     }
 
     pub fn revert(&mut self) {
-        self.data.retain(|&s| s.initial);
+        self.data.retain(|&s| s.unwrap().initial);
     }
 
-    pub fn get_square(&self, coord: &Coordinate) -> Option<&Square> {
-        self.data.get(coord.get_index())
+    pub fn get_square(&self, coord: &Coordinate) -> &Option<Square> {
+        self.data.get(coord.get_index()).expect("Should be there")
     }
 
     pub fn initialized(&mut self, init: bool) {
         self.initialized = init;
     }
 
-    pub fn get_data(&self) -> &Vec<Square> {
+    pub fn get_data(&self) -> &Vec<Option<Square>> {
         &self.data
     }
 
@@ -119,7 +133,7 @@ impl Board {
             }
         }
         for coord in conflicts.iter() {
-            let square = self.data.get_mut(coord.get_index()).expect("Should be in list.");
+            let mut square = self.data.get_mut(coord.get_index()).expect("Should be in list.").expect("Should be initialized");
             square.conflict = true;
         }
         !conflicts.is_empty()
@@ -152,7 +166,12 @@ impl Board {
 
     pub fn is_filled(&self) -> bool {
         debug!("{} / 81 squares filled.", self.data.len());
-        return 81 == self.data.len();
+        return 81 == self.data.iter().fold(0, |counter,value| {
+            if value.is_some() {
+                return counter + 1;
+            }
+            return counter;
+        })
     }
 
     pub fn get_state(&self) -> EGameState {
@@ -167,7 +186,11 @@ impl Board {
 
     fn reset_conflicts(&mut self) {
         for square in self.data.iter_mut() {
-            square.conflict = false;
+            match square {
+                &mut Some(mut p)  => p.conflict = false,
+                &mut None => (),
+
+            }
         }
     }
 
@@ -205,8 +228,8 @@ impl fmt::Display for Board {
                     f,
                     "{} ",
                     match square {
-                        None => String::from(" "),
-                        Some(ref p) => {
+                        &None => String::from(" "),
+                        &Some(ref p) => {
                             let mut digit = p.value.to_string();
                             if p.initial {
                                 digit = Cyan.paint(digit).to_string();

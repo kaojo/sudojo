@@ -21,7 +21,12 @@ impl VirtualBoard {
         // insert already known data
         for (index, square) in board.get_data().iter().enumerate() {
             let coordinate = Coordinate::from_index(index);
-            v_board.data.insert(coordinate, Field::from_square(square));
+            match square {
+                &Some(p) => {
+                    v_board.data.insert(coordinate, Field::from_square(&p));
+                },
+                &None => (),
+            }
         }
 
         // initialize unknown fields in virtual board

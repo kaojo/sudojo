@@ -9,8 +9,8 @@ impl HorizontalUniqueRule {
     pub fn apply(coordinate: &Coordinate, board: &Board) -> EGameState {
         let value: u8;
         match board.get_square(coordinate) {
-            None => return EGameState::Ok,
-            Some(p) => value = p.value,
+            &None => return EGameState::Ok,
+            &Some(p) => value = p.value,
         }
         for x in 1..10 {
             if x != coordinate.x {
@@ -30,7 +30,7 @@ impl HorizontalUniqueRule {
         for y in 1..10 {
             let mut row_result: HashSet<u8> = HashSet::new();
             for x in 1..10 {
-                if let Some(ref p) = board.get_square(&Coordinate::new(x, y)) {
+                if let &Some(ref p) = board.get_square(&Coordinate::new(x, y)) {
                     row_result.insert(p.value);
                 }
             }
@@ -42,7 +42,7 @@ impl HorizontalUniqueRule {
     pub fn get_forbidden_values(board: &Board, coordinate: &Coordinate) -> HashSet<u8> {
         let mut row_result: HashSet<u8> = HashSet::new();
         for x in 1..10 {
-            if let Some(ref p) = board.get_square(&Coordinate::new(x, coordinate.y)) {
+            if let &Some(ref p) = board.get_square(&Coordinate::new(x, coordinate.y)) {
                 row_result.insert(p.value);
             }
         }
@@ -56,8 +56,8 @@ impl VerticalUniqueRule {
     pub fn apply(coordinate: &Coordinate, board: &Board) -> EGameState {
         let value: u8;
         match board.get_square(coordinate) {
-            None => return EGameState::Ok,
-            Some(p) => value = p.value,
+            &None => return EGameState::Ok,
+            &Some(p) => value = p.value,
         }
         for y in 1..10 {
             if y != coordinate.y {
@@ -77,7 +77,7 @@ impl VerticalUniqueRule {
         for x in 1..10 {
             let mut column_result: HashSet<u8> = HashSet::new();
             for y in 1..10 {
-                if let Some(ref p) = board.get_square(&Coordinate::new(x, y)) {
+                if let &Some(ref p) = board.get_square(&Coordinate::new(x, y)) {
                     column_result.insert(p.value);
                 }
             }
@@ -89,7 +89,7 @@ impl VerticalUniqueRule {
     pub fn get_forbidden_values(board: &Board, coordinate: &Coordinate) -> HashSet<u8> {
         let mut column_result: HashSet<u8> = HashSet::new();
         for y in 1..10 {
-            if let Some(ref p) = board.get_square(&Coordinate::new(coordinate.x, y)) {
+            if let &Some(ref p) = board.get_square(&Coordinate::new(coordinate.x, y)) {
                 column_result.insert(p.value);
             }
         }
@@ -103,8 +103,8 @@ impl QuadrantUniqueRule {
     pub fn apply(coordinate: &Coordinate, board: &Board) -> EGameState {
         let value: u8;
         match board.get_square(coordinate) {
-            None => return EGameState::Ok,
-            Some(p) => value = p.value,
+            &None => return EGameState::Ok,
+            &Some(p) => value = p.value,
         }
         let x_quadrant = (coordinate.x as f32 / 3 as f32).ceil() as u8;
         let y_quadrant = (coordinate.y as f32 / 3 as f32).ceil() as u8;
@@ -130,7 +130,7 @@ impl QuadrantUniqueRule {
             let q_x = iterator.q_x;
             let q_y = iterator.q_y;
             for (x, y) in iterator {
-                if let Some(ref p) = board.get_square(&Coordinate::new(x, y)) {
+                if let &Some(ref p) = board.get_square(&Coordinate::new(x, y)) {
                     quadrant_result.insert(p.value);
                 }
             }
@@ -142,7 +142,7 @@ impl QuadrantUniqueRule {
     pub fn get_forbidden_values(board: &Board, coordinate: &Coordinate) -> HashSet<u8> {
         let mut quadrant_result: HashSet<u8> = HashSet::new();
         for (_, y) in quadrant_squares_iterator(coordinate.x, coordinate.y) {
-            if let Some(ref p) = board.get_square(&Coordinate::new(coordinate.x, y)) {
+            if let &Some(ref p) = board.get_square(&Coordinate::new(coordinate.x, y)) {
                 quadrant_result.insert(p.value);
             }
         }
