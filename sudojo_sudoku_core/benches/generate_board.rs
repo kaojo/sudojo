@@ -6,17 +6,24 @@ extern crate sudojo_core;
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use sudojo_sudoku_core::sudoku::generator::{BackTraceGenerator, Generator};
+    use sudojo_sudoku_core::sudoku::generator::{BackTraceGenerator, FastestGenerator};
     use sudojo_sudoku_core::sudoku::game::Board;
-    use sudojo_core::app::difficulty::EDifficulty;
     use test::Bencher;
 
     #[bench]
-    fn test_fast_sudoku_generation(b: &mut Bencher) {
+    fn test_super_fast_sudoku_generation(b: &mut Bencher) {
         let mut board = Board::new();
         b.iter(|| {
-            board = BackTraceGenerator::generate(EDifficulty::Easy);
+            board = FastestGenerator::generate_board();
+        });
+        println!("{}", board)
+    }
+
+    #[bench]
+    fn test_super_old_sudoku_generation(b: &mut Bencher) {
+        let mut board = Board::new();
+        b.iter(|| {
+            board = BackTraceGenerator::generate_board();
         });
         println!("{}", board)
     }

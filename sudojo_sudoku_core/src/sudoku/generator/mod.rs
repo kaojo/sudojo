@@ -1,12 +1,13 @@
+pub use self::completed_sudoku::{FastestGenerator, BackTraceGenerator};
+
 use sudojo_core::app::difficulty::EDifficulty;
 use super::game::{Board, Coordinate, Square, EGameState};
-use super::game::rule::{QuadrantUniqueRule, HorizontalUniqueRule, VerticalUniqueRule};
 use super::ai::{SolveController, ESolvingIntelligence};
 use rand::distributions::{Range, IndependentSample};
 use rand::{Rng, thread_rng};
 use std::collections::HashSet;
 
-pub mod standalone;
+mod completed_sudoku;
 
 pub trait Generator {
     fn generate(difficulty: EDifficulty) -> Board;
@@ -25,14 +26,6 @@ impl Generator for SimpleGenerator {
         debug!("Found board after {} iterations", counter);
 
         result.unwrap()
-    }
-}
-
-pub struct BackTraceGenerator {}
-
-impl Generator for BackTraceGenerator {
-    fn generate(_: EDifficulty) -> Board {
-        generate_completed_board_backtrace().unwrap()
     }
 }
 
@@ -124,86 +117,6 @@ fn generate_board_rng(max_number: u8) -> Result<Board, String> {
     Ok(result)
 }
 
-fn generate_completed_board_backtrace() -> Result<Board, String> {
-    let mut board = Board::new();
-    do_fill_with_backtrace(&mut board, Coordinate::new(1, 1))?;
-    return Ok(board);
-}
-
-fn do_fill_with_backtrace(board: &mut Board, coord: Coordinate) -> Result<&mut Board, String> {
-    let set: Vec<u8> = get_shuffled_values(&board, &coord);
-    for value in set {
-        let state = board
-            .fill_square(coord, Square::new(value, true))
-            .expect("Should allways return ok.");
-
-        match state {
-            EGameState::Finished => return Ok(board),
-            EGameState::Conflict => board.delete_force(&coord),
-            EGameState::Ok => {
-                let c = get_next_coordinate(&coord);
-                if c.is_none() {
-                    return Ok(board);
-                }
-                let mut error = false;
-                match do_fill_with_backtrace(board, c.unwrap()) {
-                    Err(_) => {
-                        error = true;
-                    }
-                    Ok(p) => {}
-                }
-                if error {
-                    board.delete_force(&coord);
-                    continue;
-                }
-                return Ok(board);
-            }
-        }
-    }
-    return Err(String::from("No suitable value found for field"));
-}
-
-fn get_shuffled_values(board: &Board, coordinate: &Coordinate) -> Vec<u8> {
-    let mut vec: Vec<u8> = vec![1, 2, 3, 4, 5, 6, 7, 8, 9];
-    let mut rng = thread_rng();
-
-    let mut forbidden_values = HorizontalUniqueRule::get_forbidden_values(board, coordinate);
-    for value in VerticalUniqueRule::get_forbidden_values(board, coordinate) {
-        forbidden_values.push(value);
-    }
-    for value in QuadrantUniqueRule::get_forbidden_values(board, coordinate) {
-        forbidden_values.push(value);
-    }
-
-     let filter = |x: &mut u8| {
-         forbidden_values.contains(x)
-     };
-     let mut i = 0;
-     while i != vec.len() {
-         if filter(&mut vec[i]) {
-             let val = vec.remove(i);
-             // your code here
-         } else {
-             i += 1;
-         }
-     }
-
-    rng.shuffle(&mut vec);
-    vec
-}
-
-fn get_next_coordinate(coord: &Coordinate) -> Option<Coordinate> {
-    let x = coord.x;
-    let y = coord.y;
-
-    if x < 9 {
-        return Some(Coordinate::new(x + 1, y));
-    } else if y < 9 {
-        return Some(Coordinate::new(1, y + 1));
-    }
-    None
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -211,15 +124,6 @@ mod tests {
     #[test]
     fn test_naiv_sudoku_generation() {
         let result = generate_board_rng(10);
-        assert!(result.is_ok());
-        let board = result.unwrap();
-        assert!(!board.has_conflicts());
-        println!("{}", board)
-    }
-
-    #[test]
-    fn test_fast_sudoku_generation() {
-        let result = generate_completed_board_backtrace();
         assert!(result.is_ok());
         let board = result.unwrap();
         assert!(!board.has_conflicts());

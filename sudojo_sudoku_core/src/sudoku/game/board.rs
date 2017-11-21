@@ -3,7 +3,7 @@ use super::rule::{HorizontalUniqueRule, QuadrantUniqueRule, VerticalUniqueRule};
 use std::fmt;
 use ansi_term::Colour::{Cyan, Red, Green, Purple};
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Board {
     data: Vec<Option<Square>>,
     turn_history: Vec<Coordinate>,
@@ -13,13 +13,21 @@ pub struct Board {
 impl Board {
     pub fn new() -> Self {
         let mut vec = Vec::new();
-        for index in 0..81 {
+        for _ in 0..81 {
             vec.push(None);
         }
         Board {
             data: vec,
             turn_history: Vec::new(),
             initialized: false,
+        }
+    }
+
+    pub fn from_vec(vec: Vec<Option<Square>>) -> Self {
+        Board {
+            data: vec,
+            turn_history: Vec::new(),
+            initialized: true,
         }
     }
 
@@ -34,7 +42,7 @@ impl Board {
                 "Can't put non initial values in the board during init phase.",
             ));
         } else {
-            let mut not_allowed = true;
+            let not_allowed;
             {
                 let s = self.data.get(coordinate.get_index()).expect("Should be initialized");
                 match s {
