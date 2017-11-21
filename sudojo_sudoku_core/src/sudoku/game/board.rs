@@ -1,9 +1,7 @@
-use std::collections::HashMap;
 use super::{Coordinate, EGameState, Square};
 use super::rule::{HorizontalUniqueRule, QuadrantUniqueRule, VerticalUniqueRule};
 use std::fmt;
 use ansi_term::Colour::{Cyan, Red, Green, Purple};
-use std::collections::HashSet;
 
 #[derive(Clone, Debug)]
 pub struct Board {
@@ -101,7 +99,7 @@ impl Board {
             None => {
                 debug!("{:?}", coord);
                 return &None;
-            },
+            }
         }
     }
 
@@ -113,36 +111,27 @@ impl Board {
         &self.data
     }
 
-    pub fn mark_conflicts(&mut self) -> bool {
+    pub fn mark_conflicts(&mut self) {
         self.reset_conflicts();
-        let cloned_data = self.data.clone();
-        let mut conflicts: Vec<Coordinate> = Vec::new();
-        for (index, _) in cloned_data.iter().enumerate() {
+        for (index, mut square) in self.data.iter().enumerate() {
+            let mut has_conflict = false;
             let coord: Coordinate = Coordinate::from_index(index);
             match HorizontalUniqueRule::apply(&coord, &self) {
-                EGameState::Conflict => {
-                    conflicts.push(coord);
-                }
+                EGameState::Conflict => {has_conflict = true}
                 _ => (),
             }
             match VerticalUniqueRule::apply(&coord, &self) {
-                EGameState::Conflict => {
-                    conflicts.push(coord);
-                }
+                EGameState::Conflict => {has_conflict = true}
                 _ => (),
             }
             match QuadrantUniqueRule::apply(&coord, &self) {
-                EGameState::Conflict => {
-                    conflicts.push(coord);
-                }
+                EGameState::Conflict => {has_conflict = true}
                 _ => (),
             }
+            if has_conflict {
+                square.unwrap().conflict = true;
+            }
         }
-        for coord in conflicts.iter() {
-            let mut square = self.data.get_mut(coord.get_index()).expect("Should be in list.").expect("Should be initialized");
-            square.conflict = true;
-        }
-        !conflicts.is_empty()
     }
 
     pub fn has_conflicts(&self) -> bool {
@@ -172,12 +161,12 @@ impl Board {
 
     pub fn is_filled(&self) -> bool {
         debug!("{} / 81 squares filled.", self.data.len());
-        return 81 == self.data.iter().fold(0, |counter,value| {
+        return 81 == self.data.iter().fold(0, |counter, value| {
             if value.is_some() {
                 return counter + 1;
             }
             return counter;
-        })
+        });
     }
 
     pub fn get_state(&self) -> EGameState {
@@ -193,9 +182,8 @@ impl Board {
     fn reset_conflicts(&mut self) {
         for square in self.data.iter_mut() {
             match square {
-                &mut Some(mut p)  => p.conflict = false,
+                &mut Some(mut p) => p.conflict = false,
                 &mut None => (),
-
             }
         }
     }

@@ -131,7 +131,7 @@ fn generate_completed_board_backtrace() -> Result<Board, String> {
 }
 
 fn do_fill_with_backtrace(board: &mut Board, coord: Coordinate) -> Result<&mut Board, String> {
-    let set: HashSet<u8> = get_shuffled_values(&board, &coord);
+    let set: Vec<u8> = get_shuffled_values(&board, &coord);
     for value in set {
         let state = board
             .fill_square(coord, Square::new(value, true))
@@ -163,24 +163,33 @@ fn do_fill_with_backtrace(board: &mut Board, coord: Coordinate) -> Result<&mut B
     return Err(String::from("No suitable value found for field"));
 }
 
-fn get_shuffled_values(board: &Board, coordinate: &Coordinate) -> HashSet<u8> {
-    let mut set: HashSet<u8> = HashSet::new();
-    let mut possible_values = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+fn get_shuffled_values(board: &Board, coordinate: &Coordinate) -> Vec<u8> {
+    let mut vec: Vec<u8> = vec![1, 2, 3, 4, 5, 6, 7, 8, 9];
     let mut rng = thread_rng();
-    rng.shuffle(&mut possible_values);
-    for value in possible_values.iter() {
-        set.insert(*value);
-    }
-    for value in HorizontalUniqueRule::get_forbidden_values(board, coordinate) {
-        set.remove(&value);
-    }
+
+    let mut forbidden_values = HorizontalUniqueRule::get_forbidden_values(board, coordinate);
     for value in VerticalUniqueRule::get_forbidden_values(board, coordinate) {
-        set.remove(&value);
+        forbidden_values.push(value);
     }
     for value in QuadrantUniqueRule::get_forbidden_values(board, coordinate) {
-        set.remove(&value);
+        forbidden_values.push(value);
     }
-    set
+
+     let filter = |x: &mut u8| {
+         forbidden_values.contains(x)
+     };
+     let mut i = 0;
+     while i != vec.len() {
+         if filter(&mut vec[i]) {
+             let val = vec.remove(i);
+             // your code here
+         } else {
+             i += 1;
+         }
+     }
+
+    rng.shuffle(&mut vec);
+    vec
 }
 
 fn get_next_coordinate(coord: &Coordinate) -> Option<Coordinate> {

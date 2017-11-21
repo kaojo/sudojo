@@ -39,11 +39,11 @@ impl HorizontalUniqueRule {
         result
     }
 
-    pub fn get_forbidden_values(board: &Board, coordinate: &Coordinate) -> HashSet<u8> {
-        let mut row_result: HashSet<u8> = HashSet::new();
+    pub fn get_forbidden_values(board: &Board, coordinate: &Coordinate) -> Vec<u8> {
+        let mut row_result = Vec::new();
         for x in 1..10 {
             if let &Some(ref p) = board.get_square(&Coordinate::new(x, coordinate.y)) {
-                row_result.insert(p.value);
+                row_result.push(p.value);
             }
         }
         row_result
@@ -86,11 +86,11 @@ impl VerticalUniqueRule {
         result
     }
 
-    pub fn get_forbidden_values(board: &Board, coordinate: &Coordinate) -> HashSet<u8> {
-        let mut column_result: HashSet<u8> = HashSet::new();
+    pub fn get_forbidden_values(board: &Board, coordinate: &Coordinate) -> Vec<u8> {
+        let mut column_result = Vec::new();
         for y in 1..10 {
             if let &Some(ref p) = board.get_square(&Coordinate::new(coordinate.x, y)) {
-                column_result.insert(p.value);
+                column_result.push(p.value);
             }
         }
         column_result
@@ -139,11 +139,11 @@ impl QuadrantUniqueRule {
         result
     }
 
-    pub fn get_forbidden_values(board: &Board, coordinate: &Coordinate) -> HashSet<u8> {
-        let mut quadrant_result: HashSet<u8> = HashSet::new();
+    pub fn get_forbidden_values(board: &Board, coordinate: &Coordinate) -> Vec<u8> {
+        let mut quadrant_result: Vec<u8> = Vec::new();
         for (_, y) in QuadrantSquaresIterator::from_board_coordinates(coordinate.x, coordinate.y) {
             if let &Some(ref p) = board.get_square(&Coordinate::new(coordinate.x, y)) {
-                quadrant_result.insert(p.value);
+                quadrant_result.push(p.value);
             }
         }
         quadrant_result
