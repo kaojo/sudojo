@@ -114,8 +114,8 @@ impl VirtualBoard {
         }
     }
 
-    pub fn get_field(&self, coordinate: &Coordinate) -> Option<&Field> {
-        self.data.get(coordinate.get_index())
+    pub fn get_field(&self, index: usize) -> Option<&Field> {
+        self.data.get(index)
     }
 
     pub fn get_data(&self) -> &Vec<Field> {

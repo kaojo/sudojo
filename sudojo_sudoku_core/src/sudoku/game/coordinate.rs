@@ -24,6 +24,10 @@ impl Coordinate {
             y,
         }
     }
+
+    pub fn calc_index(x:u8,y:u8) -> usize {
+        return (9 * (y - 1) + x - 1) as usize;
+    }
 }
 
 

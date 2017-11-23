@@ -42,11 +42,11 @@ fn iterate_solve(b: Board, intelligence: &ESolvingIntelligence) -> Result<Board,
             debug!("{}", message);
             return Err(String::from(message));
         }
-        let (coordinate, field) = tmp.unwrap();
+        let (index, field) = tmp.unwrap();
         for value in field.get_possible_values().into_iter() {
             let mut tmp_board = board.clone();
-            debug!("Guessing value {} at coordinate {:?}", value, coordinate);
-            match tmp_board.fill_square(coordinate, Square::guess(*value)) {
+            debug!("Guessing value {} at index {:?}", value, index);
+            match tmp_board.fill_square(index, Square::guess(*value)) {
                 Err(p) => error!("{}", p),
                 Ok(EGameState::Conflict) => {
                     debug!("Conflict");
@@ -78,8 +78,8 @@ fn do_solving_iteration(mut board: Board, intelligence: &ESolvingIntelligence) -
     let mut state: EGameState = board.get_state();
     while state == EGameState::Ok && !suggestion_controller.get_suggestions().is_empty() {
         for suggestion in suggestion_controller.get_suggestions() {
-            let (coord, square) = suggestion;
-            match board.fill_square(coord, square) {
+            let (index, square) = suggestion;
+            match board.fill_square(index, square) {
                 Ok(p) => {
                     state = p;
                     ()
@@ -98,13 +98,12 @@ fn do_solving_iteration(mut board: Board, intelligence: &ESolvingIntelligence) -
     board
 }
 
-fn get_guess_data(v_board: VirtualBoard) -> Option<(Coordinate, Field)> {
+fn get_guess_data(v_board: VirtualBoard) -> Option<(usize, Field)> {
     for threshold in 2..10 {
-        for (x, y) in board_iterator() {
-            let coord = Coordinate::new(x, y);
-            if let Some(p) = v_board.get_field(&coord) {
+        for i in 0..81 {
+            if let Some(p) = v_board.get_field(i) {
                 if !p.is_initial() && p.get_possible_values().len() == threshold {
-                    return Some((coord, p.clone()));
+                    return Some((i, p.clone()));
                 }
             }
         }

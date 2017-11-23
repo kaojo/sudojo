@@ -31,7 +31,7 @@ fn do_fill_with_backtrace(board: &mut Board, coord: Coordinate) -> Result<&mut B
     let set: Vec<u8> = get_shuffled_values(&board, &coord);
     for value in set {
         let state = board
-            .fill_square(coord, Square::new(value, true))
+            .fill_square(coord.get_index(), Square::new(value, true))
             .expect("Should allways return ok.");
 
         match state {

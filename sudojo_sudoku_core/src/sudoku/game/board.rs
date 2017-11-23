@@ -28,11 +28,11 @@ impl Board {
         }
     }
 
-    pub fn fill_square(&mut self, coordinate: Coordinate, square: Square) -> Result<EGameState, String> {
-        debug!("{:?}, {:?}", coordinate, square);
+    pub fn fill_square(&mut self, index: usize, square: Square) -> Result<EGameState, String> {
+        debug!("{:?}, {:?}", index, square);
         let not_allowed;
         {
-            let s = self.data.get(coordinate.get_index()).expect("Should be initialized");
+            let s = self.data.get(index).expect("Should be initialized");
             match s {
                 &Some(_) => return Err(String::from(
                     "A Field with these coordinates allready exists!",
@@ -43,10 +43,10 @@ impl Board {
             }
         }
         if !not_allowed {
-            self.data.remove(coordinate.get_index());
-            self.data.insert(coordinate.get_index(), Some(square));
+            self.data.remove(index);
+            self.data.insert(index, Some(square));
         }
-        return Ok(Board::evaluate_after_add(self, &coordinate));
+        return Ok(Board::evaluate_after_add(self, &Coordinate::from_index(index)));
     }
 
     pub fn delete_square(&mut self, coord: &Coordinate) -> Result<EGameState, String> {

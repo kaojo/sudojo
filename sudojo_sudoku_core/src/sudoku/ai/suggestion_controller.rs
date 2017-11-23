@@ -14,15 +14,15 @@ impl SuggestionController {
         }
     }
 
-    pub fn get_suggestions(&self) -> Vec<(Coordinate, Square)> {
-        let mut result: Vec<(Coordinate, Square)> = Vec::new();
+    pub fn get_suggestions(&self) -> Vec<(usize, Square)> {
+        let mut result: Vec<(usize, Square)> = Vec::new();
         // add suggestions where only one virtual value is allowed in a square
-        for (x, y) in board_iterator() {
-            if let Some(ref p) = self.virtual_board.get_field(&Coordinate::new(x, y)) {
+        for i in 0..81 {
+            if let Some(ref p) = self.virtual_board.get_field(i) {
                 let possible_values: &Vec<u8> = p.get_possible_values();
                 if !p.is_initial() && possible_values.len() == 1 {
                     let value = possible_values.iter().next().expect("should be there");
-                    result.push((Coordinate::new(x, y), Square::generate(*value)));
+                    result.push((i, Square::generate(*value)));
                 }
             }
         }
@@ -33,7 +33,7 @@ impl SuggestionController {
             let y = coordinate.y;
             for value in field.get_possible_values().iter() {
                 if !field.is_initial() && (self.count_horizontal(value, &y) == 1 || self.count_vertical(value, &x) == 1 || self.count_quarter(value, &x, &y) == 1) {
-                    result.push((Coordinate::new(x, y), Square::generate(*value)));
+                    result.push((index, Square::generate(*value)));
                     break;
                 }
             }
@@ -45,7 +45,7 @@ impl SuggestionController {
     fn count_horizontal(&self, value: &u8, y: &u8) -> u8 {
         let mut count: u8 = 0;
         for x in 1..10 {
-            let field = self.virtual_board.get_field(&Coordinate::new(x, *y)).expect("Should be there");
+            let field = self.virtual_board.get_field(Coordinate::calc_index(x, *y)).expect("Should be there");
             if field.has_possible_value(value) {
                 count += 1;
             }
@@ -56,7 +56,7 @@ impl SuggestionController {
     fn count_vertical(&self, value: &u8, x: &u8) -> u8 {
         let mut count: u8 = 0;
         for y in 1..10 {
-            let field = self.virtual_board.get_field(&Coordinate::new(*x, y)).expect("Should be there");
+            let field = self.virtual_board.get_field(Coordinate::calc_index(*x, y)).expect("Should be there");
             if field.has_possible_value(value) {
                 count += 1;
             }
@@ -68,7 +68,7 @@ impl SuggestionController {
         let mut count: u8 = 0;
 
         for (qx, qy) in QuadrantSquaresIterator::from_board_coordinates(*x, *y) {
-            let field = self.virtual_board.get_field(&Coordinate::new(qx, qy)).expect("Should be there");
+            let field = self.virtual_board.get_field(Coordinate::calc_index(qx, qy)).expect("Should be there");
             if field.has_possible_value(value) {
                 count += 1;
             }

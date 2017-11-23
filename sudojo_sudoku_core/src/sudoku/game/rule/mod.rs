@@ -1,7 +1,6 @@
 use super::{Coordinate, Board, EGameState};
 use super::super::util::iterators::{quadrant_iterator, QuadrantSquaresIterator};
 use super::super::ai::VirtualBoard;
-use std::collections::HashMap;
 
 pub struct HorizontalUniqueRule {}
 
@@ -158,7 +157,7 @@ impl RowQuadrantCombinationRule {
             let x_quadrant = calculate_quadrant(coordinate.x);
             //not in same quadrant
             if !(((x_quadrant - 1) * 3 + 1) <= x && x <= (x_quadrant * 3)) {
-                if let Some(ref p) = v_board.get_field(&Coordinate::new(x, coordinate.y)) {
+                if let Some(ref p) = v_board.get_field(Coordinate::calc_index(x, coordinate.y)) {
                     if p.get_possible_values().contains(value) {
                         return false;
                     }
@@ -172,7 +171,7 @@ impl RowQuadrantCombinationRule {
             let y_quadrant = calculate_quadrant(coordinate.y);
             //not in same quadrant
             if !(((y_quadrant - 1) * 3 + 1) <= y && y <= (y_quadrant * 3)) {
-                if let Some(ref p) = v_board.get_field(&Coordinate::new(coordinate.x, y)) {
+                if let Some(ref p) = v_board.get_field(Coordinate::calc_index(coordinate.x, y)) {
                     if p.get_possible_values().contains(value) {
                         return false;
                     }
@@ -192,6 +191,7 @@ mod tests {
     use super::*;
     use super::super::super::ai::Field;
     use super::super::super::util::iterators::board_iterator;
+    use std::collections::HashMap;
 
     #[test]
     fn test_calculate_quadrant() {

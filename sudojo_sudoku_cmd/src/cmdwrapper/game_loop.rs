@@ -3,7 +3,6 @@ use sudojo_sudoku_core::sudoku::ai::{SuggestionController, SolveController, ESol
 use sudojo_sudoku_core::sudoku::Sudoku;
 use sudojo_sudoku_core::sudoku::game::{Coordinate, Square};
 use std::io;
-use std::collections::HashSet;
 use super::command_parsing::CommandActionTypeParser;
 use super::command_parsing::EActionType;
 
@@ -46,9 +45,10 @@ impl GameLoop for Sudoku {
                 }
                 EActionType::Suggest => {
                     let suggestion_controller: SuggestionController = SuggestionController::new(&self.board, &ESolvingIntelligence::ComplexLogic);
-                    let possible_turns: Vec<(Coordinate, Square)> = suggestion_controller.get_suggestions();
+                    let possible_turns: Vec<(usize, Square)> = suggestion_controller.get_suggestions();
                     for suggestion in possible_turns.into_iter() {
-                        let (coord, square) = suggestion;
+                        let (index, square) = suggestion;
+                        let coord = Coordinate::from_index(index);
                         info!("{},{},{}", coord.x, coord.y, square.value)
                     }
                 }

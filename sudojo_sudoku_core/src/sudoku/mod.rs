@@ -46,7 +46,7 @@ impl Turn<(Coordinate, Option<Square>), Board> for Sudoku {
         let (coord, square) = turn;
         match square {
             Some(ref p) => {
-                self.board.fill_square(coord, p.clone())?;
+                self.board.fill_square(coord.get_index(), p.clone())?;
                 return Ok(&self.board);
             }
             None => {

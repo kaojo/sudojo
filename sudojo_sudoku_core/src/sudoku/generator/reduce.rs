@@ -36,7 +36,7 @@ fn iterate_remove_square<'a>(board: &'a mut Board, target_size: u8, difficulty: 
         if error {
             debug!("{:?}, {:?}", coordinate, square);
             debug!("{}", board);
-            board.fill_square(coordinate, square)?;
+            board.fill_square(coordinate.get_index(), square)?;
         }
     }
 
