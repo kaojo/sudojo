@@ -1,45 +1,44 @@
-use std::collections::HashSet;
 use super::super::game::Square;
 
 #[derive(Debug, Clone)]
 pub struct Field {
-    possible_values: HashSet<u8>,
+    possible_values: Vec<u8>,
     initial: bool,
 }
 
 impl Field {
     pub fn from_square(square: &Square) -> Self {
         let mut field = Field {
-            possible_values: HashSet::new(),
+            possible_values: Vec::new(),
             initial: true,
         };
-        field.possible_values.insert(square.value);
+        field.possible_values.push(square.value);
         field
     }
     pub fn new() -> Self {
         let mut field = Field {
-            possible_values: HashSet::new(),
+            possible_values: Vec::new(),
             initial: false,
         };
         for x in 1..10 {
-            field.possible_values.insert(x);
+            field.possible_values.push(x);
         }
 
         field
     }
-    pub fn from_possible_values(values: HashSet<u8>) -> Self {
+    pub fn from_possible_values(values: Vec<u8>) -> Self {
         Field {
             possible_values: values,
             initial: false,
         }
     }
 
-    pub fn get_possible_values(&self) -> &HashSet<u8> {
+    pub fn get_possible_values(&self) -> &Vec<u8> {
         &self.possible_values
     }
 
-    pub fn disallow_value(&mut self, value: u8) -> bool {
-        self.possible_values.remove(&value)
+    pub fn disallow_value(&mut self, value: u8) {
+        self.possible_values.retain(|v| *v != value)
     }
 
     pub fn is_initial(&self) -> bool {

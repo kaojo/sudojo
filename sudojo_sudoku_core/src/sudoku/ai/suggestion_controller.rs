@@ -2,7 +2,6 @@ use super::VirtualBoard;
 use super::ESolvingIntelligence;
 use super::super::game::{Board, Coordinate, Square};
 use super::super::util::iterators::{board_iterator, QuadrantSquaresIterator};
-use std::collections::HashSet;
 
 pub struct SuggestionController {
     virtual_board: VirtualBoard,
@@ -15,25 +14,26 @@ impl SuggestionController {
         }
     }
 
-    pub fn get_suggestions(&self) -> HashSet<(Coordinate, Square)> {
-        let mut result: HashSet<(Coordinate, Square)> = HashSet::new();
+    pub fn get_suggestions(&self) -> Vec<(Coordinate, Square)> {
+        let mut result: Vec<(Coordinate, Square)> = Vec::new();
         // add suggestions where only one virtual value is allowed in a square
         for (x, y) in board_iterator() {
             if let Some(ref p) = self.virtual_board.get_field(&Coordinate::new(x, y)) {
-                let possible_values: &HashSet<u8> = p.get_possible_values();
+                let possible_values: &Vec<u8> = p.get_possible_values();
                 if !p.is_initial() && possible_values.len() == 1 {
                     let value = possible_values.iter().next().expect("should be there");
-                    result.insert((Coordinate::new(x, y), Square::generate(*value)));
+                    result.push((Coordinate::new(x, y), Square::generate(*value)));
                 }
             }
         }
         // add suggestions where values are counted in each row/column/quadrant -> (count == 1) means only allowed here
-        for (coord, field) in self.virtual_board.get_data().iter() {
-            let x = coord.x;
-            let y = coord.y;
+        for (index, field) in self.virtual_board.get_data().iter().enumerate() {
+            let coordinate = Coordinate::from_index(index);
+            let x = coordinate.x;
+            let y = coordinate.y;
             for value in field.get_possible_values().iter() {
                 if !field.is_initial() && (self.count_horizontal(value, &y) == 1 || self.count_vertical(value, &x) == 1 || self.count_quarter(value, &x, &y) == 1) {
-                    result.insert((Coordinate::new(x, y), Square::generate(*value)));
+                    result.push((Coordinate::new(x, y), Square::generate(*value)));
                     break;
                 }
             }

@@ -1,7 +1,7 @@
 use super::{Coordinate, Board, EGameState};
 use super::super::util::iterators::{quadrant_iterator, QuadrantSquaresIterator};
 use super::super::ai::VirtualBoard;
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap};
 
 pub struct HorizontalUniqueRule {}
 
@@ -25,16 +25,16 @@ impl HorizontalUniqueRule {
         EGameState::Ok
     }
 
-    pub fn get_disallowed_values(board: &Board) -> HashMap<u8, HashSet<u8>> {
-        let mut result: HashMap<u8, HashSet<u8>> = HashMap::new();
+    pub fn get_disallowed_values(board: &Board) -> Vec<Vec<u8>> {
+        let mut result: Vec<Vec<u8>> = Vec::new();
         for y in 1..10 {
-            let mut row_result: HashSet<u8> = HashSet::new();
+            let mut row_result: Vec<u8> = Vec::new();
             for x in 1..10 {
                 if let &Some(ref p) = board.get_square(&Coordinate::new(x, y)) {
-                    row_result.insert(p.value);
+                    row_result.push(p.value);
                 }
             }
-            result.insert(y, row_result);
+            result.push(row_result);
         }
         result
     }
@@ -72,16 +72,16 @@ impl VerticalUniqueRule {
         EGameState::Ok
     }
 
-    pub fn get_disallowed_values(board: &Board) -> HashMap<u8, HashSet<u8>> {
-        let mut result: HashMap<u8, HashSet<u8>> = HashMap::new();
+    pub fn get_disallowed_values(board: &Board) -> Vec<Vec<u8>> {
+        let mut result: Vec<Vec<u8>> = Vec::new();
         for x in 1..10 {
-            let mut column_result: HashSet<u8> = HashSet::new();
+            let mut column_result: Vec<u8> = Vec::new();
             for y in 1..10 {
                 if let &Some(ref p) = board.get_square(&Coordinate::new(x, y)) {
-                    column_result.insert(p.value);
+                    column_result.push(p.value);
                 }
             }
-            result.insert(x, column_result);
+            result.push(column_result);
         }
         result
     }
@@ -123,15 +123,15 @@ impl QuadrantUniqueRule {
         EGameState::Ok
     }
 
-    pub fn get_disallowed_values(board: &Board) -> HashMap<Coordinate, HashSet<u8>> {
-        let mut result: HashMap<Coordinate, HashSet<u8>> = HashMap::new();
+    pub fn get_disallowed_values(board: &Board) -> HashMap<Coordinate, Vec<u8>> {
+        let mut result: HashMap<Coordinate, Vec<u8>> = HashMap::new();
         for iterator in quadrant_iterator() {
-            let mut quadrant_result: HashSet<u8> = HashSet::new();
+            let mut quadrant_result: Vec<u8> = Vec::new();
             let q_x = iterator.q_x;
             let q_y = iterator.q_y;
             for (x, y) in iterator {
                 if let &Some(ref p) = board.get_square(&Coordinate::new(x, y)) {
-                    quadrant_result.insert(p.value);
+                    quadrant_result.push(p.value);
                 }
             }
             result.insert(Coordinate::new(q_x, q_y), quadrant_result);
@@ -158,7 +158,7 @@ impl RowQuadrantCombinationRule {
             let x_quadrant = calculate_quadrant(coordinate.x);
             //not in same quadrant
             if !(((x_quadrant - 1) * 3 + 1) <= x && x <= (x_quadrant * 3)) {
-                if let Some(p) = v_board.get_field(&Coordinate::new(x, coordinate.y)) {
+                if let Some(ref p) = v_board.get_field(&Coordinate::new(x, coordinate.y)) {
                     if p.get_possible_values().contains(value) {
                         return false;
                     }
@@ -172,7 +172,7 @@ impl RowQuadrantCombinationRule {
             let y_quadrant = calculate_quadrant(coordinate.y);
             //not in same quadrant
             if !(((y_quadrant - 1) * 3 + 1) <= y && y <= (y_quadrant * 3)) {
-                if let Some(p) = v_board.get_field(&Coordinate::new(coordinate.x, y)) {
+                if let Some(ref p) = v_board.get_field(&Coordinate::new(coordinate.x, y)) {
                     if p.get_possible_values().contains(value) {
                         return false;
                     }
@@ -209,8 +209,8 @@ mod tests {
     #[test]
     fn is_exclusive_in_quadrant_horizontally() {
         let mut map: HashMap<Coordinate, Field> = HashMap::new();
-        let mut set: HashSet<u8> = HashSet::new();
-        set.insert(1);
+        let mut set: Vec<u8> = Vec::new();
+        set.push(1);
         //is unique in quadrant
         map.insert(Coordinate::new(1, 1), Field::from_possible_values(set.clone()));
         // following values should be removed
@@ -220,6 +220,15 @@ mod tests {
         map.insert(Coordinate::new(9, 2), Field::from_possible_values(set.clone()));
         map.insert(Coordinate::new(3, 3), Field::from_possible_values(set.clone()));
         // is not unique in quadrant
+        set.clear();
+        map.insert(Coordinate::new(2, 1), Field::from_possible_values(set.clone()));
+        map.insert(Coordinate::new(3, 1), Field::from_possible_values(set.clone()));
+        map.insert(Coordinate::new(4, 1), Field::from_possible_values(set.clone()));
+        map.insert(Coordinate::new(5, 1), Field::from_possible_values(set.clone()));
+        map.insert(Coordinate::new(6, 1), Field::from_possible_values(set.clone()));
+        map.insert(Coordinate::new(7, 1), Field::from_possible_values(set.clone()));
+        map.insert(Coordinate::new(8, 1), Field::from_possible_values(set.clone()));
+        map.insert(Coordinate::new(9, 1), Field::from_possible_values(set.clone()));
 
         let board = VirtualBoard::from(map);
         let coordinate_1_1 = Coordinate::new(1, 1);
@@ -235,15 +244,15 @@ mod tests {
     #[test]
     fn is_exclusive_in_quadrant_vertically() {
         let mut map: HashMap<Coordinate, Field> = HashMap::new();
-        let mut set: HashSet<u8> = HashSet::new();
-        set.insert(9);
+        let mut set: Vec<u8> = Vec::new();
+        set.push(9);
 
         for (x, y) in board_iterator() {
             map.insert(Coordinate::new(x, y), Field::from_possible_values(set.clone()));
         }
-        set.remove(&9);
-        set.insert(1);
-        set.insert(2);
+        set.clear();
+        set.push(1);
+        set.push(2);
         map.insert(Coordinate::new(6, 1), Field::from_possible_values(set.clone()));
         map.insert(Coordinate::new(6, 2), Field::from_possible_values(set.clone()));
         map.insert(Coordinate::new(6, 3), Field::from_possible_values(set.clone()));

@@ -41,12 +41,12 @@ impl GameLoop for Sudoku {
                 EActionType::Help => { parser.print_help() }
                 EActionType::Revert => { self.board.revert() }
                 EActionType::Solve => {
-                    let sc = SolveController::new(ESolvingIntelligence::WithGuessing, false);
+                    let sc = SolveController::new(ESolvingIntelligence::WithGuessing);
                     self.board = sc.solve(&self.board).expect("solving should work");
                 }
                 EActionType::Suggest => {
-                    let suggestion_controller: SuggestionController = SuggestionController::new(&self.board, &ESolvingIntelligence::ComplexLogic, false);
-                    let possible_turns: HashSet<(Coordinate, Square)> = suggestion_controller.get_suggestions();
+                    let suggestion_controller: SuggestionController = SuggestionController::new(&self.board, &ESolvingIntelligence::ComplexLogic);
+                    let possible_turns: Vec<(Coordinate, Square)> = suggestion_controller.get_suggestions();
                     for suggestion in possible_turns.into_iter() {
                         let (coord, square) = suggestion;
                         info!("{},{},{}", coord.x, coord.y, square.value)

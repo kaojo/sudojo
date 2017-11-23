@@ -1,4 +1,4 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap};
 use super::super::game::{Coordinate, Board};
 use super::super::ai::ESolvingIntelligence;
 use super::super::game::rule::{HorizontalUniqueRule, VerticalUniqueRule, QuadrantUniqueRule, RowQuadrantCombinationRule};
@@ -9,50 +9,43 @@ use ansi_term::Colour::{Cyan, Green};
 
 #[derive(Debug)]
 pub struct VirtualBoard {
-    data: HashMap<Coordinate, Field>,
+    data: Vec<Field>,
 }
 
 impl VirtualBoard {
     pub fn new(board: &Board, intelligence: &ESolvingIntelligence) -> Self {
         let mut v_board = VirtualBoard {
-            data: HashMap::new(),
+            data: Vec::new(),
         };
 
-        // insert already known data
+        let mut empty_fields: Vec<Coordinate> = Vec::new();
         for (index, square) in board.get_data().iter().enumerate() {
             let coordinate = Coordinate::from_index(index);
             match square {
                 &Some(p) => {
-                    v_board.data.insert(coordinate, Field::from_square(&p));
-                },
-                &None => (),
-            }
-        }
-
-        // initialize unknown fields in virtual board
-        let mut empty_fields: HashSet<Coordinate> = HashSet::new();
-        for (x, y) in board_iterator() {
-            match v_board.data.get(&Coordinate::new(x, y)) {
-                Some(_) => (),
-                None => {
-                    empty_fields.insert(Coordinate::new(x, y));
-                    v_board.data.insert(Coordinate::new(x, y), Field::new());
-                    ()
+                    // insert already known data
+                    v_board.data.push(Field::from_square(&p));
+                }
+                &None => {
+                    // initialize unknown fields in virtual board
+                    v_board.data.push(Field::new());
+                    empty_fields.push(coordinate);
                 }
             }
         }
-        let disallowed_values_row: HashMap<u8, HashSet<u8>> = HorizontalUniqueRule::get_disallowed_values(board);
-        let disallowed_values_column: HashMap<u8, HashSet<u8>> = VerticalUniqueRule::get_disallowed_values(board);
-        let disallowed_values_quadrants: HashMap<Coordinate, HashSet<u8>> = QuadrantUniqueRule::get_disallowed_values(board);
+
+        let disallowed_values_row: Vec<Vec<u8>> = HorizontalUniqueRule::get_disallowed_values(board);
+        let disallowed_values_column: Vec<Vec<u8>> = VerticalUniqueRule::get_disallowed_values(board);
+        let disallowed_values_quadrants: HashMap<Coordinate, Vec<u8>> = QuadrantUniqueRule::get_disallowed_values(board);
 
         for coordinate in empty_fields {
-            if let Some(ref mut p) = v_board.data.get_mut(&coordinate) {
-                if let Some(ref q) = disallowed_values_row.get(&(coordinate.y)) {
+            if let Some(ref mut p) = v_board.data.get_mut(coordinate.get_index()) {
+                if let Some(ref q) = disallowed_values_row.get(coordinate.y as usize) {
                     for x in q.into_iter() {
                         p.disallow_value(*x);
                     }
                 }
-                if let Some(ref q) = disallowed_values_column.get(&(coordinate.x)) {
+                if let Some(ref q) = disallowed_values_column.get(coordinate.x as usize) {
                     for y in q.into_iter() {
                         p.disallow_value(*y);
                     }
@@ -76,7 +69,7 @@ impl VirtualBoard {
     fn remove_row_quad_comb_rule(v_board: &mut VirtualBoard) {
         for (x, y) in board_iterator() {
             let coordinate = Coordinate::new(x, y);
-            let field = v_board.data.get(&coordinate).expect("All fields should be initialized by now.").clone();
+            let field = v_board.data.get(coordinate.get_index()).expect("All fields should be initialized by now.").clone();
             if field.is_initial() {
                 continue;
             }
@@ -85,10 +78,7 @@ impl VirtualBoard {
                 if exclusive_in_quadrant_horizontally {
                     for (qx, qy) in QuadrantSquaresIterator::from_board_coordinates(coordinate.x, coordinate.y) {
                         if qy != coordinate.y {
-                            let removed = v_board.data.get_mut(&Coordinate::new(qx, qy)).expect("").disallow_value(*value);
-                            if removed {
-                                debug!("{:?}, {}, {}, {}, {}", coordinate, qx, qy, value, removed);
-                            }
+                            v_board.data.get_mut(Coordinate::new(qx, qy).get_index()).expect("all data is initialized").disallow_value(*value);
                         }
                     }
                 }
@@ -96,10 +86,7 @@ impl VirtualBoard {
                 if exclusive_in_quadrant_vertically {
                     for (qx, qy) in QuadrantSquaresIterator::from_board_coordinates(coordinate.x, coordinate.y) {
                         if qx != coordinate.x {
-                            let removed = v_board.data.get_mut(&Coordinate::new(qx, qy)).expect("").disallow_value(*value);
-                            if removed {
-                                debug!("{:?}, {}, {}, {}, {}", coordinate, qx, qy, value, removed);
-                            }
+                            v_board.data.get_mut(Coordinate::new(qx, qy).get_index()).expect("all data is initialized").disallow_value(*value);
                         }
                     }
                 }
@@ -108,16 +95,29 @@ impl VirtualBoard {
     }
 
     pub fn from(data: HashMap<Coordinate, Field>) -> Self {
+        let mut vec = Vec::new();
+        // insert already known data
+        for i in 0..81 {
+            match data.get(&Coordinate::from_index(i)) {
+                None => {
+                    vec.push(Field::new());
+                }
+                Some(p) => {
+                    vec.push(p.clone());
+                }
+            }
+        }
+
         VirtualBoard {
-            data
+            data: vec
         }
     }
 
     pub fn get_field(&self, coordinate: &Coordinate) -> Option<&Field> {
-        self.data.get(coordinate)
+        self.data.get(coordinate.get_index())
     }
 
-    pub fn get_data(&self) -> &HashMap<Coordinate, Field> {
+    pub fn get_data(&self) -> &Vec<Field> {
         &self.data
     }
 }
@@ -128,7 +128,7 @@ impl fmt::Display for VirtualBoard {
         for y in 1..10 {
             for i in 1..4 {
                 for x in 1..10 {
-                    let field = self.data.get(&Coordinate::new(x, y));
+                    let field = self.data.get(Coordinate::new(x, y).get_index());
                     write!(f, " | ")?;
                     for value in ((i - 1) * 3 + 1)..(i * 3 + 1) {
                         write_single_value(f, field, value);
