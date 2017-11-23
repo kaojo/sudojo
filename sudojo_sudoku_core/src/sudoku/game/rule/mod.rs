@@ -1,7 +1,7 @@
 use super::{Coordinate, Board, EGameState};
 use super::super::util::iterators::{quadrant_iterator, QuadrantSquaresIterator};
 use super::super::ai::VirtualBoard;
-use std::collections::{HashMap};
+use std::collections::HashMap;
 
 pub struct HorizontalUniqueRule {}
 
@@ -123,8 +123,8 @@ impl QuadrantUniqueRule {
         EGameState::Ok
     }
 
-    pub fn get_disallowed_values(board: &Board) -> HashMap<Coordinate, Vec<u8>> {
-        let mut result: HashMap<Coordinate, Vec<u8>> = HashMap::new();
+    pub fn get_disallowed_values(board: &Board) -> Vec<Vec<u8>> {
+        let mut result: Vec<Vec<u8>> = Vec::new();
         for iterator in quadrant_iterator() {
             let mut quadrant_result: Vec<u8> = Vec::new();
             let q_x = iterator.q_x;
@@ -134,7 +134,7 @@ impl QuadrantUniqueRule {
                     quadrant_result.push(p.value);
                 }
             }
-            result.insert(Coordinate::new(q_x, q_y), quadrant_result);
+            result.push(quadrant_result);
         }
         result
     }
@@ -184,7 +184,7 @@ impl RowQuadrantCombinationRule {
 }
 
 fn calculate_quadrant(x: u8) -> u8 {
-    return (x as f32 / 3 as f32).ceil() as u8
+    return (x as f32 / 3 as f32).ceil() as u8;
 }
 
 #[cfg(test)]

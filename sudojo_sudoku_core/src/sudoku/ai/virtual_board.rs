@@ -36,7 +36,7 @@ impl VirtualBoard {
 
         let disallowed_values_row: Vec<Vec<u8>> = HorizontalUniqueRule::get_disallowed_values(board);
         let disallowed_values_column: Vec<Vec<u8>> = VerticalUniqueRule::get_disallowed_values(board);
-        let disallowed_values_quadrants: HashMap<Coordinate, Vec<u8>> = QuadrantUniqueRule::get_disallowed_values(board);
+        let disallowed_values_quadrants: Vec<Vec<u8>> = QuadrantUniqueRule::get_disallowed_values(board);
 
         for coordinate in empty_fields {
             if let Some(ref mut p) = v_board.data.get_mut(coordinate.get_index()) {
@@ -52,7 +52,8 @@ impl VirtualBoard {
                 }
                 let x_quadrant = (coordinate.x as f32 / 3 as f32).ceil() as u8;
                 let y_quadrant = (coordinate.y as f32 / 3 as f32).ceil() as u8;
-                if let Some(ref q) = disallowed_values_quadrants.get(&Coordinate::new(x_quadrant, y_quadrant)) {
+                let index = (y_quadrant - 1) * 3 + x_quadrant - 1;
+                if let Some(ref q) = disallowed_values_quadrants.get(index as usize) {
                     for x in q.into_iter() {
                         p.disallow_value(*x);
                     }
