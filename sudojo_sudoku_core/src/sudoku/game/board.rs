@@ -7,7 +7,6 @@ use ansi_term::Colour::{Cyan, Red, Green, Purple};
 pub struct Board {
     data: Vec<Option<Square>>,
     turn_history: Vec<Coordinate>,
-    initialized: bool,
 }
 
 impl Board {
@@ -19,7 +18,6 @@ impl Board {
         Board {
             data: vec,
             turn_history: Vec::new(),
-            initialized: false,
         }
     }
 
@@ -27,42 +25,28 @@ impl Board {
         Board {
             data: vec,
             turn_history: Vec::new(),
-            initialized: true,
         }
     }
 
     pub fn fill_square(&mut self, coordinate: Coordinate, square: Square) -> Result<EGameState, String> {
         debug!("{:?}, {:?}", coordinate, square);
-        if self.initialized && square.initial {
-            return Err(String::from(
-                "Initializing squares in the board is only allowed during init phase.",
-            ));
-        } else if !self.initialized && !square.initial {
-            return Err(String::from(
-                "Can't put non initial values in the board during init phase.",
-            ));
-        } else {
-            let not_allowed;
-            {
-                let s = self.data.get(coordinate.get_index()).expect("Should be initialized");
-                match s {
-                    &Some(_) => return Err(String::from(
-                        "A Field with these coordinates allready exists!",
-                    )),
-                    &None => {
-                        not_allowed = false;
-                        if self.initialized {
-                            self.turn_history.push(coordinate);
-                        }
-                    }
+        let not_allowed;
+        {
+            let s = self.data.get(coordinate.get_index()).expect("Should be initialized");
+            match s {
+                &Some(_) => return Err(String::from(
+                    "A Field with these coordinates allready exists!",
+                )),
+                &None => {
+                    not_allowed = false;
                 }
             }
-            if !not_allowed {
-                self.data.remove(coordinate.get_index());
-                self.data.insert(coordinate.get_index(), Some(square));
-            }
-            return Ok(Board::evaluate_after_add(self, &coordinate));
         }
+        if !not_allowed {
+            self.data.remove(coordinate.get_index());
+            self.data.insert(coordinate.get_index(), Some(square));
+        }
+        return Ok(Board::evaluate_after_add(self, &coordinate));
     }
 
     pub fn delete_square(&mut self, coord: &Coordinate) -> Result<EGameState, String> {
@@ -111,10 +95,6 @@ impl Board {
         }
     }
 
-    pub fn initialized(&mut self, init: bool) {
-        self.initialized = init;
-    }
-
     pub fn get_data(&self) -> &Vec<Option<Square>> {
         &self.data
     }
@@ -125,15 +105,15 @@ impl Board {
             let mut has_conflict = false;
             let coord: Coordinate = Coordinate::from_index(index);
             match HorizontalUniqueRule::apply(&coord, &self) {
-                EGameState::Conflict => {has_conflict = true}
+                EGameState::Conflict => { has_conflict = true }
                 _ => (),
             }
             match VerticalUniqueRule::apply(&coord, &self) {
-                EGameState::Conflict => {has_conflict = true}
+                EGameState::Conflict => { has_conflict = true }
                 _ => (),
             }
             match QuadrantUniqueRule::apply(&coord, &self) {
-                EGameState::Conflict => {has_conflict = true}
+                EGameState::Conflict => { has_conflict = true }
                 _ => (),
             }
             if has_conflict {
@@ -169,12 +149,7 @@ impl Board {
 
     pub fn is_filled(&self) -> bool {
         debug!("{} / 81 squares filled.", self.data.len());
-        return 81 == self.data.iter().fold(0, |counter, value| {
-            if value.is_some() {
-                return counter + 1;
-            }
-            return counter;
-        });
+        return 81 == self.get_size();
     }
 
     pub fn get_state(&self) -> EGameState {
@@ -185,6 +160,15 @@ impl Board {
         } else {
             EGameState::Ok
         }
+    }
+
+    pub fn get_size(&self) -> usize {
+        self.data.iter().fold(0, |counter, value| {
+            if value.is_some() {
+                return counter + 1;
+            }
+            return counter;
+        })
     }
 
     fn reset_conflicts(&mut self) {

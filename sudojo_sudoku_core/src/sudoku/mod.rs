@@ -1,6 +1,6 @@
 use sudoku::game::{Board, Coordinate, Square};
 use sudojo_core::app::{App, AppState, EAppState, EStartChoice, Start, Tick, Turn};
-use self::generator::{Generator, SimpleGenerator};
+use self::generator::{Generator, PuzzleGenerator};
 
 pub mod game;
 pub mod ai;
@@ -28,7 +28,7 @@ impl Start for Sudoku {
         match start_choice {
             EStartChoice::NewGame(p) => {
                 info!("Starting new game!");
-                self.board = SimpleGenerator::generate(p);
+                self.board = PuzzleGenerator::generate(p);
             }
             _ => info!("Choice not supported yet"),
         }
